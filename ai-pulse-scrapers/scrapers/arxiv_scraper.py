@@ -6,7 +6,7 @@ import asyncio
 import logging
 import time
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import httpx
@@ -14,6 +14,20 @@ import httpx
 from cache.file_cache import cached
 
 from .schema import Article
+
+try:
+    from llm.quotas import human_to_slug, merge_category_lists
+except ImportError:  # pragma: no cover
+    def human_to_slug(label: str) -> str | None:  # type: ignore[misc]
+        return None
+
+    def merge_category_lists(*lists: list[str] | None) -> list[str]:  # type: ignore[misc]
+        out: list[str] = []
+        for lst in lists:
+            for c in lst or []:
+                if c not in out:
+                    out.append(c)
+        return out
 
 logger = logging.getLogger(__name__)
 
@@ -103,9 +117,16 @@ def _parse_entry(entry: ET.Element) -> dict[str, Any] | None:
 async def search_arxiv(query: str, max_results: int = 10) -> list[dict[str, Any]]:
     """
     Query ArXiv Atom API. Returns a list of paper dicts, or [] on error.
+
+    ``query`` may be plain keywords (wrapped as ``all:…``) or raw ArXiv syntax
+    such as ``cat:cs.AR`` / ``cat:cs.RO``.
     """
+    q = (query or "").strip()
+    if not q:
+        return []
+    search_query = q if q.startswith(("cat:", "all:", "ti:", "abs:", "au:")) else f"all:{q}"
     params = {
-        "search_query": f"all:{query}",
+        "search_query": search_query,
         "sortBy": "submittedDate",
         "sortOrder": "descending",
         "max_results": max_results,
@@ -136,9 +157,11 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "generative AI",
     ],
     "chips & hardware": [
+        "cat:cs.AR",
         "neural network accelerator",
         "GPU architecture",
         "chip design machine learning",
+        "semiconductor hardware accelerator",
     ],
     "networking & cloud": [
         "software defined networking",
@@ -151,14 +174,11 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "LLM security",
     ],
     "autonomous vehicles": [
+        "cat:cs.RO",
         "autonomous driving",
         "lidar perception",
         "motion planning",
-    ],
-    "dev tools": [
-        "code generation",
-        "program synthesis",
-        "automated testing",
+        "robotaxi autonomous vehicle",
     ],
 }
 
@@ -167,6 +187,8 @@ DEFAULT_CATEGORIES = list(CATEGORY_QUERIES.keys())
 
 def _paper_to_article(paper: dict[str, Any]) -> Article:
     abstract = paper["abstract"]
+    query_cats = list(paper.get("_query_cats") or [])
+    arxiv_cats = list(paper.get("categories") or [])
     return Article(
         title=paper["title"],
         url=paper["abstract_url"],
@@ -175,10 +197,10 @@ def _paper_to_article(paper: dict[str, Any]) -> Article:
         snippet=abstract[:300],
         full_text=abstract,
         published_at=paper["published"] or None,
-        fetched_at=datetime.utcnow().isoformat(),
+        fetched_at=datetime.now(timezone.utc).isoformat(),
         engagement=None,
         authors=list(paper["authors"]),
-        categories=list(paper["categories"]),
+        categories=merge_category_lists(query_cats, arxiv_cats),
         image_url=None,
         extra={"pdf_url": paper["pdf_url"]},
     )
@@ -186,7 +208,7 @@ def _paper_to_article(paper: dict[str, Any]) -> Article:
 
 async def fetch_arxiv_articles(
     categories: list[str] | None = None,
-    max_per_query: int = 6,
+    max_per_query: int = 10,
 ) -> list[Article]:
     """
     Fetch papers for each category query, strictly serialized for ArXiv rate limits.
@@ -195,12 +217,14 @@ async def fetch_arxiv_articles(
     sem = asyncio.Semaphore(1)
     all_papers: list[dict[str, Any]] = []
     first = True
+    per_cat_raw: dict[str, int] = {}
 
     for cat in cats:
         queries = CATEGORY_QUERIES.get(cat)
         if not queries:
             logger.warning("Unknown category %r — skipping", cat)
             continue
+        slug = human_to_slug(cat) or cat
         for q in queries:
             if not first:
                 await asyncio.sleep(3)
@@ -208,16 +232,36 @@ async def fetch_arxiv_articles(
             logger.info("ArXiv query [%s]: %r", cat, q)
             async with sem:
                 batch = await search_arxiv(q, max_results=max_per_query)
-            all_papers.extend(batch)
+            for p in batch:
+                row = dict(p)
+                row["_query_cats"] = merge_category_lists(row.get("_query_cats"), [slug])
+                all_papers.append(row)
+                per_cat_raw[slug] = per_cat_raw.get(slug, 0) + 1
 
     by_url: dict[str, dict[str, Any]] = {}
     for p in all_papers:
         u = p["abstract_url"]
         if u not in by_url:
             by_url[u] = p
+        else:
+            by_url[u]["_query_cats"] = merge_category_lists(
+                by_url[u].get("_query_cats"), p.get("_query_cats")
+            )
 
     articles = [_paper_to_article(p) for p in by_url.values()]
-    logger.info("fetch_arxiv_articles: %d unique papers", len(articles))
+    final_counts: dict[str, int] = {}
+    for a in articles:
+        for c in a.categories:
+            if c in (
+                "ai_ml",
+                "chips_hardware",
+                "networking_cloud",
+                "cybersecurity",
+                "autonomous_vehicles",
+            ):
+                final_counts[c] = final_counts.get(c, 0) + 1
+    logger.info("ArXiv raw hits per category: %s", per_cat_raw)
+    logger.info("fetch_arxiv_articles: %d unique papers; topic stamps %s", len(articles), final_counts)
     return articles
 
 

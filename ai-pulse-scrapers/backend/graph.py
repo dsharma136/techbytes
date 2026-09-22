@@ -73,13 +73,12 @@ _DEFAULT_CATEGORIES = [
     "networking & cloud",
     "cybersecurity",
     "autonomous vehicles",
-    "dev tools",
 ]
 
 
 async def generate_daily_feed(
     categories: list[str] | None = None,
-    target_cards: int = 50,
+    target_cards: int = 60,
 ) -> FeedState:
     """
     Run the full pipeline asynchronously and return final ``FeedState``.

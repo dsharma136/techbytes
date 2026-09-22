@@ -1,9 +1,902 @@
 {
   "date": "2026-09-22",
-  "generated_at": "2026-09-22T17:30:37.141244+00:00",
-  "cards": [],
-  "errors": [
-    "Cluster: Error code: 404 - {'error': {'message': 'The model `llama-3.3-70b-versatile` does not exist or you do not have access to it.', 'type': 'invalid_request_error', 'code': 'model_not_found'}}",
-    "Cards: no story clusters to process"
-  ]
+  "generated_at": "2026-09-22T22:01:48.320900+00:00",
+  "cards": [
+    {
+      "headline": "OpenAI unveils GPT‑6 Sol, Luna and Astra, claiming an Enigma breakthrough",
+      "blurb": "OpenAI announced three GPT‑6 variants—Sol, Luna and Astra.  According to the Astra team, the model cracked a German Army Enigma message that had resisted solution since 2005.  The same discussion notes OpenAI is positioned to fast‑follow the Jev approach to calibrated probability judgments.",
+      "why_it_matters": "Decoding a historic cipher shows how far large‑scale language models have come and hints at future applications in cryptanalysis and high‑stakes decision‑making.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 1,
+      "sources": [
+        {
+          "title": "GPT-6 Sol and Luna",
+          "url": "https://openai.com/index/introducing-gpt-6-sol-and-luna/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 916,
+            "comments": 483
+          },
+          "published_at": "2026-09-22T18:00:34+00:00"
+        },
+        {
+          "title": "OpenAI GPT–6 Astra breaks Enigma message that has resisted solution since 2005",
+          "url": "https://www.cryptocellar.org/bgac/the-mvueh-break.html",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 508,
+            "comments": 345
+          },
+          "published_at": "2026-09-22T13:52:15+00:00"
+        },
+        {
+          "title": "OpenAI is well positioned to fast-follow Jev",
+          "url": "https://arcturus-labs.com/blog/2026/09/21/will-openai-eat-jevs-lunch/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 233,
+            "comments": 176
+          },
+          "published_at": "2026-09-22T14:42:59+00:00"
+        }
+      ],
+      "importance_score": 0.92,
+      "published_at": "2026-09-22T18:00:34+00:00",
+      "cluster_title": "OpenAI GPT‑6 developments"
+    },
+    {
+      "headline": "Pirate Face provides checksum‑verified mirrors to safeguard LLMs from deletion",
+      "blurb": "The new Pirate Face service offers an \"un‑bannable\" mirror that stores sovereign AI models with checksum verification.  This allows users to keep exact copies of LLMs safe from remote removal or censorship.",
+      "why_it_matters": "Model preservation and independent control become possible even when hosting providers enforce deletions, strengthening AI decentralization.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 2,
+      "sources": [
+        {
+          "title": "Pirate Face Rescues LLM Models from Deletion",
+          "url": "https://pirateface.co/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 555,
+            "comments": 147
+          },
+          "published_at": "2026-09-20T15:16:07+00:00"
+        }
+      ],
+      "importance_score": 0.78,
+      "published_at": "2026-09-20T15:16:07+00:00",
+      "cluster_title": "Pirate Face rescues LLMs from deletion"
+    },
+    {
+      "headline": "Mini‑AGI shows continual learning on a laptop with 8 GB VRAM",
+      "blurb": "The open‑source Mini‑AGI project trains a dynamic continual‑learning model from scratch on a consumer laptop using a batch‑1 data stream and only 8 GB of VRAM.  It demonstrates that AGI‑adjacent experiments can run on modest hardware.",
+      "why_it_matters": "Lowering the hardware barrier democratizes advanced AI research and speeds up experimentation outside large data‑center labs.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 3,
+      "sources": [
+        {
+          "title": "Show HN: Mini-AGI – Dynamic continual learning model trained on 8GB VRAM",
+          "url": "https://github.com/volotat/mini-AGI/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 273,
+            "comments": 72
+          },
+          "published_at": "2026-09-21T04:42:37+00:00"
+        }
+      ],
+      "importance_score": 0.74,
+      "published_at": "2026-09-21T04:42:37+00:00",
+      "cluster_title": "Mini‑AGI dynamic continual‑learning model"
+    },
+    {
+      "headline": "Claude Opus 5.5 performance, intelligence and price dissected",
+      "blurb": "A recent analysis evaluates Claude Opus 5.5’s intelligence, benchmark performance and pricing structure, providing a side‑by‑side comparison for potential adopters.",
+      "why_it_matters": "Understanding the cost‑to‑capability ratio helps enterprises choose the right LLM for their workloads, influencing AI budgeting and deployment strategies.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 4,
+      "sources": [
+        {
+          "title": "Claude Opus 5.5 Intelligence, Performance and Price Analysis (Max)",
+          "url": "https://artificialanalysis.ai/models/claude-opus-5-5",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 189,
+            "comments": 52
+          },
+          "published_at": "2026-09-22T16:51:31+00:00"
+        }
+      ],
+      "importance_score": 0.71,
+      "published_at": "2026-09-22T16:51:31+00:00",
+      "cluster_title": "Claude Opus 5.5 performance and price analysis"
+    },
+    {
+      "headline": "The LLMentalist Effect (2023) discussed on Hacker News",
+      "blurb": "A post titled “The LLMentalist Effect (2023)” appeared on Hacker News, highlighting a recent analysis of large language model behavior. The piece is identified solely by its title and year, with no additional details provided.",
+      "why_it_matters": "Even brief community discussions can surface emerging perspectives on LLM impacts, shaping future research directions.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 5,
+      "sources": [
+        {
+          "title": "The LLMentalist Effect (2023)",
+          "url": "https://softwarecrisis.dev/letters/llmentalist/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 230,
+            "comments": 307
+          },
+          "published_at": "2026-09-20T12:20:13+00:00"
+        }
+      ],
+      "importance_score": 0.66,
+      "published_at": "2026-09-20T12:20:13+00:00",
+      "cluster_title": "The LLMentalist Effect (2023)"
+    },
+    {
+      "headline": "OpenAI’s ad collector drops a tracking cookie named __obi on .openai.com",
+      "blurb": "When you browse ChatGPT, OpenAI sets a cookie called __obi that is scoped to the .openai.com domain. The cookie’s value is linked to your ChatGPT account and is sent back to OpenAI on subsequent requests. This mechanism lets OpenAI record your activity across other sites that embed the ad collector.",
+      "why_it_matters": "Cross‑site tracking can expose user behavior to the service provider, raising privacy concerns for anyone using ChatGPT in a browser.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 6,
+      "sources": [
+        {
+          "title": "ChatGPT now knows what you do on other websites via ad collector",
+          "url": "https://www.buchodi.com/chatgpt-now-knows-what-you-do-on-other-websites-via-ad-collector/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 758,
+            "comments": 393
+          },
+          "published_at": "2026-09-20T15:18:44+00:00"
+        }
+      ],
+      "importance_score": 0.84,
+      "published_at": "2026-09-20T15:18:44+00:00",
+      "cluster_title": "ChatGPT ad‑collector privacy issue"
+    },
+    {
+      "headline": "Samsung plans to more than double HBM4 and HBM4E output next year",
+      "blurb": "Industry sources say Samsung Electronics will increase production of its HBM4 and HBM4E high‑bandwidth memory chips by over 100 % for 2025. The ramp‑up is expected to lift demand for glass carriers by about 2.5‑fold.",
+      "why_it_matters": "Higher HBM supply will ease bottlenecks for AI accelerators and GPUs that rely on ultra‑fast memory, potentially lowering costs for data‑center hardware.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 7,
+      "sources": [
+        {
+          "title": "Samsung is expected to more than double output of its HBM4 and HBM4E DRAM",
+          "url": "https://en.sedaily.com/finance/2026/09/20/samsung-to-double-hbm4-output-next-year-sources-say",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 555,
+            "comments": 455
+          },
+          "published_at": "2026-09-20T17:38:50+00:00"
+        }
+      ],
+      "importance_score": 0.81,
+      "published_at": "2026-09-20T17:38:50+00:00",
+      "cluster_title": "Samsung to double HBM4/4E DRAM output"
+    },
+    {
+      "headline": "Mac users can now disable Apple Intelligence features like Siri AI and summarization",
+      "blurb": "Apple adds a setting on macOS that lets you turn off its suite of Apple Intelligence capabilities, including the Siri‑powered AI, on‑device summarization, and related features. The toggle is located in the system preferences for privacy and performance control.",
+      "why_it_matters": "Giving users granular control over built‑in AI helps protect personal data and lets power users conserve resources on their machines.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 8,
+      "sources": [
+        {
+          "title": "Turn off and restrict access to Apple Intelligence features on Mac",
+          "url": "https://support.apple.com/guide/mac-help/turn-restrict-access-apple-intelligence-mchlb2e44f94/mac",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 340,
+            "comments": 218
+          },
+          "published_at": "2026-09-21T17:30:21+00:00"
+        }
+      ],
+      "importance_score": 0.78,
+      "published_at": "2026-09-21T17:30:21+00:00",
+      "cluster_title": "Apple Intelligence feature controls"
+    },
+    {
+      "headline": "AMD’s hardware random number generator cannot produce the value zero",
+      "blurb": "A bug in AMD’s on‑chip random number generator has been identified: the generator never outputs a zero. The issue is noted in a community post highlighting the limitation.",
+      "why_it_matters": "Missing zero values can affect cryptographic protocols and simulations that assume a uniform distribution, potentially compromising security or accuracy.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 9,
+      "sources": [
+        {
+          "title": "AMD's random number generator can't generate a 0?",
+          "url": "https://board.flatassembler.net/topic.php?t=24261",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 239,
+            "comments": 186
+          },
+          "published_at": "2026-09-22T08:39:43+00:00"
+        }
+      ],
+      "importance_score": 0.73,
+      "published_at": "2026-09-22T08:39:43+00:00",
+      "cluster_title": "AMD RNG bug cannot generate zero"
+    },
+    {
+      "headline": "Discussion resurfaces on whether Siri can be disabled in macOS 27",
+      "blurb": "A recent Ask HN thread asks if it’s impossible to turn off Siri on the upcoming macOS 27. The question highlights that users are looking for a way to completely remove the voice assistant from the desktop OS.",
+      "why_it_matters": "Control over built‑in AI features affects privacy expectations and system resource usage for power users.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 10,
+      "sources": [
+        {
+          "title": "Ask HN: Is it impossible to disable Siri on macOS 27?",
+          "url": "https://news.ycombinator.com/item?id=49786609",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 150,
+            "comments": 81
+          },
+          "published_at": "2026-09-21T12:47:05+00:00"
+        }
+      ],
+      "importance_score": 0.72,
+      "published_at": "2026-09-21T12:47:05+00:00",
+      "cluster_title": "Siri disable discussion on macOS"
+    },
+    {
+      "headline": "Apple announces policy that treats user consent as optional",
+      "blurb": "In a recent update, Apple stated that consent no longer matters for certain operations. The change was highlighted in a discussion titled “I said no and Apple said yes.” This shift signals a new stance on user permission handling.",
+      "why_it_matters": "Relaxed consent rules could affect privacy expectations and regulatory scrutiny for the ecosystem of iOS apps.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 11,
+      "sources": [
+        {
+          "title": "I said no and Apple said yes",
+          "url": "https://dbushell.com/2026/09/22/apple-intelligence/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 770,
+            "comments": 627
+          },
+          "published_at": "2026-09-22T08:04:55+00:00"
+        }
+      ],
+      "importance_score": 0.65,
+      "published_at": "2026-09-22T08:04:55+00:00",
+      "cluster_title": "Apple policy debate (\"I said no and Apple said yes\")"
+    },
+    {
+      "headline": "Intel’s 16‑bit 8088 chip first appeared around 1985",
+      "blurb": "The 8088, a 16‑bit processor from Intel, dates back to circa 1985. It remains a reference point for early personal computer architecture. The chip’s legacy is still discussed among hardware enthusiasts.",
+      "why_it_matters": "Understanding the 8088’s role helps trace the evolution of modern CPUs and the foundations of today’s computing platforms.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 12,
+      "sources": [
+        {
+          "title": "16-bit Intel 8088 chip (c. 1985)",
+          "url": "https://allpoetry.com/16-bit-Intel-8088-chip",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 93,
+            "comments": 13
+          },
+          "published_at": "2026-09-22T16:11:34+00:00"
+        }
+      ],
+      "importance_score": 0.55,
+      "published_at": "2026-09-22T16:11:34+00:00",
+      "cluster_title": "Historical 16‑bit Intel 8088 chip"
+    },
+    {
+      "headline": "Apple and Disney+ both roll out ads to all users",
+      "blurb": "Apple has begun showing persistent ads across iOS, sparking user backlash. Disney+ updated its Subscriber Agreement in January 2025 to permit advertisements before movies for every subscription tier. Both moves show major consumer platforms monetising through ads regardless of payment level.",
+      "why_it_matters": "Widespread ad insertion signals a shift toward subscription‑plus‑ad models, potentially reshaping user experience and pricing expectations across the streaming and mobile ecosystems.",
+      "category": "networking_cloud",
+      "is_research_paper": false,
+      "order": 13,
+      "sources": [
+        {
+          "title": "Apple has added persistent 'ads' to iOS, and it's driving users crazy",
+          "url": "https://www.techradar.com/phones/iphone/i-wish-apple-would-just-stop-that-crap-apple-has-added-persistent-ads-to-ios-and-its-driving-users-crazy",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 538,
+            "comments": 409
+          },
+          "published_at": "2026-09-22T14:30:12+00:00"
+        },
+        {
+          "title": "Disney+: New user agreement allows ads before movies in all subscriptions",
+          "url": "https://consumerrights.wiki/w/Disney%2B_ad_policy_change",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 504,
+            "comments": 364
+          },
+          "published_at": "2026-09-21T07:55:28+00:00"
+        }
+      ],
+      "importance_score": 0.78,
+      "published_at": "2026-09-22T14:30:12+00:00",
+      "cluster_title": "Ad insertions in consumer platforms"
+    },
+    {
+      "headline": "Energy pressure mounts on data‑center industry",
+      "blurb": "Oregon’s 111 data‑center facilities now consume nearly a quarter of the state’s total electricity. At the same time, the EU is moving to limit both energy and water use for data centres, while a developer is suing a city over on‑site renewable‑energy mandates. Wall Street is also growing skeptical of the sector’s rapid expansion.",
+      "why_it_matters": "Tighter resource constraints and regulatory scrutiny could curb the data‑center boom and force operators to adopt greener, more efficient designs.",
+      "category": "networking_cloud",
+      "is_research_paper": false,
+      "order": 14,
+      "sources": [
+        {
+          "title": "Wall Street is growing skeptical of the data center boom",
+          "url": "https://www.nytimes.com/2026/09/21/business/ai-data-center-ipos.html",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 70,
+            "comments": 85
+          },
+          "published_at": "2026-09-21T19:14:30+00:00"
+        },
+        {
+          "title": "Oregon data centers: 111 facilities consume nearly 1/4 of state's power",
+          "url": "https://www.opb.org/article/2026/09/17/oregon-data-centers-consume-quarter-state-power-report/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 14,
+            "comments": 4
+          },
+          "published_at": "2026-09-19T22:20:51+00:00"
+        },
+        {
+          "title": "Data center developer sues city for requiring to supply renewable energy on-site",
+          "url": "https://www.independent.co.uk/news/world/americas/st-louis-data-center-lawsuit-b3052142.html",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 6,
+            "comments": 0
+          },
+          "published_at": "2026-09-22T04:07:05+00:00"
+        },
+        {
+          "title": "EU moves to curb energy and water for data centres",
+          "url": "https://www.euronews.com/my-europe/2026/09/21/eu-moves-to-curb-energy-and-water-for-data-centres",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 6,
+            "comments": 0
+          },
+          "published_at": "2026-09-22T00:08:42+00:00"
+        }
+      ],
+      "importance_score": 0.72,
+      "published_at": "2026-09-22T04:07:05+00:00",
+      "cluster_title": "Data‑center energy, regulation and market pressure"
+    },
+    {
+      "headline": "Inside a typical U.S. data‑center workplace",
+      "blurb": "A recent feature walks readers through a day in the life of staff at an American data centre, describing the physical environment, shift routines, and the hands‑on tasks required to keep servers humming. The piece highlights the often‑overlooked human side of the infrastructure that powers the cloud.",
+      "why_it_matters": "Understanding the labor and conditions behind data‑center operations helps frame discussions about automation, staffing, and the true cost of digital services.",
+      "category": "networking_cloud",
+      "is_research_paper": false,
+      "order": 15,
+      "sources": [
+        {
+          "title": "What It's Like to Work in One of America's Data Centers",
+          "url": "https://www.wsj.com/business/what-its-like-to-work-in-one-of-americas-data-centers-b4358003",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 61,
+            "comments": 65
+          },
+          "published_at": "2026-09-20T21:18:58+00:00"
+        }
+      ],
+      "importance_score": 0.68,
+      "published_at": "2026-09-20T21:18:58+00:00",
+      "cluster_title": "What it’s like to work in a U.S. data centre"
+    },
+    {
+      "headline": "Meta’s Muse AI can export its own filesystem",
+      "blurb": "When prompted, Meta’s Muse AI archived the files it could see and shipped a 6.8 GB archive to the requester’s Google Drive. The experiment demonstrates the model’s ability to enumerate and package its accessible data on demand.",
+      "why_it_matters": "The capability raises new questions about data ownership, privacy, and how AI systems might be used to retrieve or exfiltrate information at scale.",
+      "category": "networking_cloud",
+      "is_research_paper": false,
+      "order": 16,
+      "sources": [
+        {
+          "title": "I asked Meta’s Muse for its filesystem and it sent me 6.8GB",
+          "url": "https://mouse.dev/blog/muse-runtime-export/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 274,
+            "comments": 141
+          },
+          "published_at": "2026-09-22T15:25:12+00:00"
+        }
+      ],
+      "importance_score": 0.65,
+      "published_at": "2026-09-22T15:25:12+00:00",
+      "cluster_title": "Meta’s Muse AI filesystem reveal"
+    },
+    {
+      "headline": "Cloudflare makes Python Workers generally available",
+      "blurb": "Developers can now run Python web frameworks and AI orchestration libraries directly inside Cloudflare Workers. The new runtime integrates with Cloudflare's D1 database, R2 object storage, and other Workers services.",
+      "why_it_matters": "Bringing Python to the edge lets apps execute faster and reduces the need for separate backend servers, expanding the serverless ecosystem.",
+      "category": "networking_cloud",
+      "is_research_paper": false,
+      "order": 17,
+      "sources": [
+        {
+          "title": "Python Workers are now generally available",
+          "url": "https://blog.cloudflare.com/python-workers-ga/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 263,
+            "comments": 41
+          },
+          "published_at": "2026-09-21T13:38:19+00:00"
+        }
+      ],
+      "importance_score": 0.6,
+      "published_at": "2026-09-21T13:38:19+00:00",
+      "cluster_title": "Python Workers become generally available"
+    },
+    {
+      "headline": "Hacking group ShinyHunters says it breached FBI systems and exfiltrated 5,000 employee records",
+      "blurb": "ShinyHunters claims to have exploited a zero‑day vulnerability in Oracle PeopleSoft to gain access to FBI data. The group posted a dump of roughly 5,000 employee and applicant records as proof of the breach. The FBI has opened an investigation but has not confirmed the scope.",
+      "why_it_matters": "If true, the breach shows that even highly secured federal agencies can be vulnerable to supply‑chain flaws and highlights the ongoing risk of zero‑day exploits.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 18,
+      "sources": [
+        {
+          "title": "Hacking group ShinyHunters claims it breached the FBI, stole agents' data",
+          "url": "https://techcrunch.com/2026/09/22/hacking-group-shinyhunters-claims-it-breached-the-fbi-stole-agents-and-applicants-data/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 12,
+            "comments": 1
+          },
+          "published_at": "2026-09-22T19:01:20+00:00"
+        },
+        {
+          "title": "ShinyHunters says it stole FBI employee data. Here’s what we know. | Mashable",
+          "url": "https://mashable.com/tech/shinyhunters-fbi-hack-employee-data-claims",
+          "source_type": "brave",
+          "source_name": "mashable.com",
+          "engagement": null,
+          "published_at": "2026-09-22T21:40:01.080014+00:00"
+        },
+        {
+          "title": "ShinyHunters claims FBI breach via new Oracle PeopleSoft zero-day | CyberInsider",
+          "url": "https://cyberinsider.com/shinyhunters-claims-fbi-breach",
+          "source_type": "brave",
+          "source_name": "cyberinsider.com",
+          "engagement": null,
+          "published_at": "2026-09-22T18:03:01.080259+00:00"
+        },
+        {
+          "title": "‘We Hacked the FBI’: ShinyHunters Hands Over 5,000 Employee Records to Back Up Stunning Breach Claim",
+          "url": "https://redstate.com/ben-smith/2026/09/22/hackers-claim-massive-fbi-breach-provide-sample-of-5000-employee-records-n2207243",
+          "source_type": "brave",
+          "source_name": "redstate.com",
+          "engagement": null,
+          "published_at": "2026-09-22T16:03:01.080064+00:00"
+        }
+      ],
+      "importance_score": 0.92,
+      "published_at": "2026-09-22T21:40:01.080014+00:00",
+      "cluster_title": "ShinyHunters claims FBI breach"
+    },
+    {
+      "headline": "EU regulators fine Google €463 million for violating location‑data rules",
+      "blurb": "The European Commission imposed a €463 million penalty on Google for breaching EU rules on the handling of users' location information. The fine stems from the company's failure to obtain proper consent for processing location data across its services.",
+      "why_it_matters": "The sanction underscores the growing enforcement power of EU privacy law and signals that large tech firms must tighten data‑collection practices.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 19,
+      "sources": [
+        {
+          "title": "Google hit with $463M fine for EU location data rule breach",
+          "url": "https://abcnews.com/Technology/wireStory/google-hit-463-million-fine-eu-location-data-136616044",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 14,
+            "comments": 0
+          },
+          "published_at": "2026-09-21T14:33:02+00:00"
+        }
+      ],
+      "importance_score": 0.84,
+      "published_at": "2026-09-21T14:33:02+00:00",
+      "cluster_title": "Google fined €463 M for EU location‑data breach"
+    },
+    {
+      "headline": "Robin Williams' daughter urges fans to stop creating AI‑generated videos of the late actor",
+      "blurb": "Michele Williams publicly asked fans to cease producing AI‑generated videos that depict Robin Williams, calling the practice disrespectful. She emphasized that deep‑fake recreations of deceased celebrities cross a moral line.",
+      "why_it_matters": "The backlash highlights ethical concerns around generative AI and the need for clearer norms or regulations on posthumous digital likenesses.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 20,
+      "sources": [
+        {
+          "title": "Robin Williams' Daughter to Fans Creating AI Videos: 'Have Some Shame'",
+          "url": "https://variety.com/2026/film/news/robin-williams-daughter-ai-videos-1236871568/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 95,
+            "comments": 61
+          },
+          "published_at": "2026-09-22T01:24:49+00:00"
+        }
+      ],
+      "importance_score": 0.8,
+      "published_at": "2026-09-22T01:24:49+00:00",
+      "cluster_title": "AI‑generated videos of Robin Williams spark backlash"
+    },
+    {
+      "headline": "Zero‑trust models must evolve to cover AI agents, experts say",
+      "blurb": "Industry panels noted that traditional zero‑trust security, built for people and applications, now needs to address autonomous AI agents operating in enterprise environments. The discussion emphasized expanding the identity perimeter to include these new agents.",
+      "why_it_matters": "Adapting zero‑trust to AI agents is critical for protecting modern enterprises where automated processes increasingly access sensitive resources.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 21,
+      "sources": [
+        {
+          "title": "Zero Trust Meets the Agentic Enterprise | ET CIO",
+          "url": "https://cio.economictimes.indiatimes.com/videos/zero-trust-meets-the-agentic-enterprise/134408234",
+          "source_type": "brave",
+          "source_name": "cio.economictimes.indiatimes.com",
+          "engagement": null,
+          "published_at": "2026-09-22T16:03:01.080178+00:00"
+        },
+        {
+          "title": "Zero-trust was built for people. Nobody told it about agents | Computer Weekly",
+          "url": "https://www.computerweekly.com/opinion/Zero-trust-was-built-for-people-Nobody-told-it-about-agents",
+          "source_type": "brave",
+          "source_name": "computerweekly.com",
+          "engagement": null,
+          "published_at": "2026-09-22T14:03:01.080112+00:00"
+        }
+      ],
+      "importance_score": 0.78,
+      "published_at": "2026-09-22T16:03:01.080178+00:00",
+      "cluster_title": "Zero‑Trust concepts for the modern enterprise"
+    },
+    {
+      "headline": "AI models are pressuring the Creative Commons licensing model",
+      "blurb": "A recent discussion notes that large language models from OpenAI and Anthropic are testing the limits of Creative Commons and other open‑source licenses. The debate centers on how software copyright protection can coexist with the openness that Creative Commons promotes.",
+      "why_it_matters": "If AI training sidesteps CC terms, creators may lose control over their work, reshaping the legal landscape for open‑source software and content.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 22,
+      "sources": [
+        {
+          "title": "AI and the Destruction of the Creative Commons",
+          "url": "https://www.chesterwisniewski.com/post/2026-09-13-ai-is-destroying-the-creative-commons/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 236,
+            "comments": 277
+          },
+          "published_at": "2026-09-20T10:07:51+00:00"
+        }
+      ],
+      "importance_score": 0.73,
+      "published_at": "2026-09-20T10:07:51+00:00",
+      "cluster_title": "AI and the erosion of Creative Commons licensing"
+    },
+    {
+      "headline": "BYD cuts EV price, becomes cheapest electric car in Australia",
+      "blurb": "BYD announced a price reduction for its electric vehicle in the Australian market, making it the lowest‑priced EV available there. The move was highlighted in a Hacker News post titled “BYD Slashes Price of Electric Car and Becomes Cheapest in Australia”.",
+      "why_it_matters": "Lower pricing could accelerate EV adoption in Australia, putting pressure on rivals to rethink pricing strategies.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 23,
+      "sources": [
+        {
+          "title": "BYD Slashes Price of Electric Car and Becomes Cheapest in Australia [video]",
+          "url": "https://www.youtube.com/watch?v=IQrnGK5FZXI",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 62,
+            "comments": 103
+          },
+          "published_at": "2026-09-20T04:46:34+00:00"
+        }
+      ],
+      "importance_score": 0.65,
+      "published_at": "2026-09-20T04:46:34+00:00",
+      "cluster_title": "BYD slashes EV price in Australia"
+    },
+    {
+      "headline": "BigCommerce alerts customers to possible data leak after cyber incident",
+      "blurb": "BigCommerce warned its users of a potential data exposure following a recent cyber incident, as reported by TechRadar. The notice emphasizes that some customer information may have been accessed.",
+      "why_it_matters": "E‑commerce platforms handle large volumes of personal and payment data, so any breach can affect many online merchants and their shoppers.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 24,
+      "sources": [
+        {
+          "title": "BigCommerce warns customers of potential data leaks following cyber incident | TechRadar",
+          "url": "https://techradar.com/pro/security/bigcommerce-warns-customers-of-potential-data-leaks-following-cyber-incident",
+          "source_type": "brave",
+          "source_name": "techradar.com",
+          "engagement": null,
+          "published_at": "2026-09-22T12:03:01.080031+00:00"
+        }
+      ],
+      "importance_score": 0.62,
+      "published_at": "2026-09-22T12:03:01.080031+00:00",
+      "cluster_title": "BigCommerce warns of potential data leak"
+    },
+    {
+      "headline": "Security researcher easily hacks BYD vehicle in demo",
+      "blurb": "A cybersecurity expert demonstrated a hack of a BYD vehicle, describing the process as “too easy,” according to a Hacker News post. The test shows that the vehicle’s defenses can be bypassed with relative simplicity.",
+      "why_it_matters": "Such vulnerabilities highlight the need for stronger automotive security as connected cars become more common.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 25,
+      "sources": [
+        {
+          "title": "We got a cybersecurity expert to hack this BYD. It was too easy",
+          "url": "https://www.abc.net.au/news/2026-09-21/byd-hacked-by-cybersecurity-expert-vehicle-sabotage-surveillance/107139482",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 20,
+            "comments": 4
+          },
+          "published_at": "2026-09-20T20:28:32+00:00"
+        }
+      ],
+      "importance_score": 0.58,
+      "published_at": "2026-09-20T20:28:32+00:00",
+      "cluster_title": "Security researcher hacks BYD vehicle"
+    },
+    {
+      "headline": "Drop: a rootless Linux sandbox with gVisor support",
+      "blurb": "A new open‑source project called Drop offers a rootless Linux sandbox that integrates gVisor for container isolation, announced on Hacker News. It enables developers to run unprivileged workloads with added security.",
+      "why_it_matters": "Rootless sandboxes reduce the attack surface for cloud‑native applications, making it easier to run code safely on shared infrastructure.",
+      "category": "cybersecurity",
+      "is_research_paper": false,
+      "order": 26,
+      "sources": [
+        {
+          "title": "Show HN: Drop – A rootless Linux sandbox with gVisor support",
+          "url": "https://droprun.sh/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 147,
+            "comments": 50
+          },
+          "published_at": "2026-09-22T13:52:47+00:00"
+        }
+      ],
+      "importance_score": 0.55,
+      "published_at": "2026-09-22T13:52:47+00:00",
+      "cluster_title": "Drop – rootless Linux sandbox with gVisor support"
+    },
+    {
+      "headline": "Tesla's FSD Supervised gets Czech approval as part of third European rollout",
+      "blurb": "Tesla is pushing software update 2026.27.300, which carries FSD Supervised v14.2.2.6, to a third batch of European owners. For the first time this batch includes drivers in Czechia, after Prague recognized the Dutch RDW permit.",
+      "why_it_matters": "Regulatory clearance in a new EU market expands Tesla’s autonomous‑driving footprint and sets a precedent for future software‑only approvals.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 27,
+      "sources": [
+        {
+          "title": "Tesla FSD v14.2.2.6 Reaches Czechia: What European Owners Should Do Now",
+          "url": "https://basenor.com/blogs/news/tesla-update-2026-27-300",
+          "source_type": "brave",
+          "source_name": "basenor.com",
+          "engagement": null,
+          "published_at": "2026-09-22T19:03:01.080984+00:00"
+        },
+        {
+          "title": "Tesla FSD Supervised Approved in Czechia",
+          "url": "https://techmymoney.com/2026/09/22/tesla-fsd-supervised-approved-in-czechia",
+          "source_type": "brave",
+          "source_name": "techmymoney.com",
+          "engagement": null,
+          "published_at": "2026-09-22T14:03:01.080855+00:00"
+        }
+      ],
+      "importance_score": 0.92,
+      "published_at": "2026-09-22T19:03:01.080984+00:00",
+      "cluster_title": "Tesla FSD rollout and approval in Czechia"
+    },
+    {
+      "headline": "Tesla’s Austin robotaxi fleet shrinks to eight vehicles after recent crash",
+      "blurb": "The active robotaxi fleet operating in Austin has fallen back to just eight vehicles over the past seven days, according to the latest report. The reduction follows a crash that knocked several Cybercabs out of service.",
+      "why_it_matters": "A shrinking fleet highlights the operational challenges of scaling driverless ride‑hailing and may influence investor confidence in Tesla’s robotaxi timeline.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 28,
+      "sources": [
+        {
+          "title": "Tesla's active robotaxi fleet in Austin crashes back to 8 vehicles after Cybercab pump | Electrek",
+          "url": "https://electrek.co/2026/09/22/tesla-robotaxi-active-fleet-austin-crashes-8-vehicles/",
+          "source_type": "brave",
+          "source_name": "electrek.co",
+          "engagement": null,
+          "published_at": "2026-09-22T14:03:01.080669+00:00"
+        }
+      ],
+      "importance_score": 0.88,
+      "published_at": "2026-09-22T14:03:01.080669+00:00",
+      "cluster_title": "Tesla active robotaxi fleet crash in Austin"
+    },
+    {
+      "headline": "Investors demand clarity on Tesla’s Cybercab strategy versus Uber’s approach",
+      "blurb": "Analysts are asking Tesla to explain how its Cybercab plan will compete with Uber’s robotaxi model. The debate centers on the differing tactics each company is using to win the autonomous ride‑hailing race.",
+      "why_it_matters": "Understanding the strategic differences is crucial for investors assessing which firm is likely to dominate the emerging robotaxi market.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 29,
+      "sources": [
+        {
+          "title": "Tesla Cybercab Strategy: The Question Investors Need Answered - Tesla (NASDAQ:TSLA) - Benzinga",
+          "url": "https://www.benzinga.com/trading-ideas/long-ideas/26/09/61922028/tesla-cybercab-strategy-robotaxi-revenue-split-question",
+          "source_type": "brave",
+          "source_name": "benzinga.com",
+          "engagement": null,
+          "published_at": "2026-09-22T14:03:01.080749+00:00"
+        }
+      ],
+      "importance_score": 0.85,
+      "published_at": "2026-09-22T14:03:01.080749+00:00",
+      "cluster_title": "Tesla Cybercab strategy – investor questions"
+    },
+    {
+      "headline": "Mercedes‑Benz signs production deal to embed Wayve’s AI Driver in premium cars",
+      "blurb": "Mercedes‑Benz has inked a deal to integrate Wayve’s AI Driver into its future models within two years, marking the automaker’s first premium‑segment deployment of the technology.",
+      "why_it_matters": "Bringing Wayve’s AI to a luxury brand accelerates mainstream adoption of advanced driver‑assistance systems and intensifies competition in the autonomous‑vehicle space.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 30,
+      "sources": [
+        {
+          "title": "Mercedes-Benz signs deal to put Wayve AI Driver in cars within 2 years | Electrek",
+          "url": "https://electrek.co/2026/09/22/mercedes-benz-wayve-ai-driver-production-agreement",
+          "source_type": "brave",
+          "source_name": "electrek.co",
+          "engagement": null,
+          "published_at": "2026-09-22T15:03:01.080885+00:00"
+        }
+      ],
+      "importance_score": 0.81,
+      "published_at": "2026-09-22T15:03:01.080885+00:00",
+      "cluster_title": "Mercedes‑Benz partners with Wayve for AI driver"
+    },
+    {
+      "headline": "Tesla’s FSD v14.3.9 mistakenly flags clean cameras as dirty",
+      "blurb": "The latest Full Self‑Driving software update, version 14.3.9, is erroneously alerting owners that their cameras need cleaning. Tesla has confirmed the bug and is pulling the update, cancelling the false service requests.",
+      "why_it_matters": "A software‑only issue can force unnecessary service visits, highlighting the challenges of scaling autonomous‑driving software safely.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 31,
+      "sources": [
+        {
+          "title": "Tesla Full Self-Driving bug falsely flags dirty cameras, demands service | Electrek",
+          "url": "https://electrek.co/2026/09/22/tesla-fsd-v14-3-9-false-camera-service-alerts/",
+          "source_type": "brave",
+          "source_name": "electrek.co",
+          "engagement": null,
+          "published_at": "2026-09-22T14:03:01.080597+00:00"
+        }
+      ],
+      "importance_score": 0.8,
+      "published_at": "2026-09-22T14:03:01.080597+00:00",
+      "cluster_title": "Tesla FSD bug flags dirty cameras, forces service"
+    },
+    {
+      "headline": "Uber and Lyft stocks tumble as Tesla, Waymo and Zoox accelerate driverless rollout",
+      "blurb": "Analysts note that the rise of well‑capitalized autonomous‑vehicle players is squeezing ride‑hailing giants. Uber and Lyft are described as \"way behind on the rollout of autonomy,\" and their shares have entered a \"nightmarish year\" amid the pressure.",
+      "why_it_matters": "The shift signals a structural challenge for traditional ride‑hailing models, potentially reshaping market share and valuation in the mobility sector.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 32,
+      "sources": [
+        {
+          "title": "Tesla, Waymo, and Zoox are driving a nightmarish year for these 2 stocks",
+          "url": "https://finance.yahoo.com/markets/stocks/article/tesla-waymo-and-zoox-are-driving-a-nightmarish-year-for-these-2-stocks-142300670.html",
+          "source_type": "brave",
+          "source_name": "finance.yahoo.com",
+          "engagement": null,
+          "published_at": "2026-09-22T15:03:01.080548+00:00"
+        }
+      ],
+      "importance_score": 0.74,
+      "published_at": "2026-09-22T15:03:01.080548+00:00",
+      "cluster_title": "Impact of Tesla, Waymo and Zoox on related stocks"
+    },
+    {
+      "headline": "Waabi’s Robotrucker completes 300‑mile highway run without prior simulation training",
+      "blurb": "Waabi announced that its Robotrucker AI drove a full 300‑mile autonomous truck route without any advance simulation or new real‑world data. This marks the first fully autonomous truck run achieved without pre‑training on the specific drive.",
+      "why_it_matters": "Eliminating the need for extensive simulation could speed up deployment of driverless freight, lowering costs and accelerating industry adoption.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 33,
+      "sources": [
+        {
+          "title": "This Robotrucker Says Its AI Now Drives Highways Without Advance Training",
+          "url": "https://forbes.com/sites/alanohnsman/2026/09/22/this-robotrucker-says-its-ai-now-drives-highways-without-advance-training",
+          "source_type": "brave",
+          "source_name": "forbes.com",
+          "engagement": null,
+          "published_at": "2026-09-22T14:03:01.081263+00:00"
+        }
+      ],
+      "importance_score": 0.73,
+      "published_at": "2026-09-22T14:03:01.081263+00:00",
+      "cluster_title": "Robotrucker AI drives highways without pre‑training"
+    },
+    {
+      "headline": "Copper‑Rs deliver live‑telemetry deterministic digital twins for robots",
+      "blurb": "The Copper‑Rs framework provides robots with deterministic twins that ingest live telemetry, enabling precise state replication and debugging in real time.",
+      "why_it_matters": "Real‑time digital twins can improve robot reliability and accelerate development cycles across manufacturing, logistics, and other automation domains.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 34,
+      "sources": [
+        {
+          "title": "Copper-Rs: Live Telemetry Deterministic Twins for Robots",
+          "url": "https://www.copper-robotics.com/whats-new/copper-12-live-telemetry-and-replayable-logs-over-a-lossy-one-way-connection-with-twinning",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 9,
+            "comments": 1
+          },
+          "published_at": "2026-09-19T23:44:07+00:00"
+        }
+      ],
+      "importance_score": 0.68,
+      "published_at": "2026-09-19T23:44:07+00:00",
+      "cluster_title": "Copper‑Rs: Live Telemetry Deterministic Twins for Robots"
+    }
+  ],
+  "errors": []
 }

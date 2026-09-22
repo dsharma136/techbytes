@@ -21,21 +21,34 @@ from cache.file_cache import cached
 from .page_scraper import scrape_multiple
 from .schema import Article
 
+try:
+    from llm.quotas import human_to_slug, merge_category_lists
+except ImportError:  # pragma: no cover
+    def human_to_slug(label: str) -> str | None:  # type: ignore[misc]
+        return None
+
+    def merge_category_lists(*lists: list[str] | None) -> list[str]:  # type: ignore[misc]
+        out: list[str] = []
+        for lst in lists:
+            for c in lst or []:
+                if c not in out:
+                    out.append(c)
+        return out
+
 load_dotenv()
 
 logger = logging.getLogger(__name__)
-
-BRAVE_API_KEY = os.getenv("BRAVE_API_KEY")
-if not BRAVE_API_KEY:
-    logger.error(
-        "BRAVE_API_KEY is not set - load .env or export the variable; Brave scraper will return no results."
-    )
 
 BRAVE_NEWS_URL = "https://api.search.brave.com/res/v1/news/search"
 
 # Last successful response quota-related headers (for CLI / debugging)
 _LAST_QUOTA_HEADERS: dict[str, str] = {}
 _QUOTA_HEADERS_LOCK = threading.Lock()
+
+
+def _brave_api_key() -> str:
+    """Read key at call time so dotenv / env changes are respected."""
+    return (os.getenv("BRAVE_API_KEY") or "").strip()
 
 
 def _merge_quota_headers(headers: httpx.Headers) -> None:
@@ -59,12 +72,44 @@ def _merge_quota_headers(headers: httpx.Headers) -> None:
 
 
 CATEGORY_QUERIES: dict[str, list[str]] = {
-    "AI/ML": ["AI product launch", "machine learning news today", "LLM update"],
-    "chips & hardware": ["semiconductor news today", "NVIDIA AMD news", "chip industry"],
-    "networking & cloud": ["cloud infrastructure news", "data center networking", "5G telecom"],
-    "cybersecurity": ["cybersecurity breach today", "zero trust news", "ransomware attack today"],
-    "autonomous vehicles": ["autonomous vehicle news", "self-driving update", "robotaxi news"],
-    "dev tools": ["developer tools launch", "open source release", "programming news"],
+    "AI/ML": [
+        "AI product launch",
+        "machine learning news today",
+        "LLM update",
+        "OpenAI Anthropic Google AI",
+    ],
+    "chips & hardware": [
+        "semiconductor news today",
+        "NVIDIA AMD news",
+        "chip industry",
+        "TSMC Intel GPU",
+        "chip fabrication fab news",
+        "semiconductor export controls",
+        "GPU accelerator news",
+        "chip foundry capacity",
+    ],
+    "networking & cloud": [
+        "cloud infrastructure news",
+        "data center networking",
+        "5G telecom",
+        "AWS Azure Cloudflare",
+    ],
+    "cybersecurity": [
+        "cybersecurity breach today",
+        "zero trust news",
+        "ransomware attack today",
+        "CVE vulnerability",
+    ],
+    "autonomous vehicles": [
+        "autonomous vehicle news",
+        "self-driving update",
+        "robotaxi news",
+        "Waymo Tesla FSD",
+        "self-driving software update",
+        "AV regulation news",
+        "autonomous trucking news",
+        "lidar robotaxi",
+    ],
 }
 
 DEFAULT_CATEGORIES = list(CATEGORY_QUERIES.keys())
@@ -147,20 +192,25 @@ def _normalize_result(item: dict[str, Any]) -> dict[str, Any]:
 
 
 @cached("brave")
-async def search_brave_news(query: str, count: int = 5) -> list[dict[str, Any]]:
+async def search_brave_news(
+    query: str, count: int = 8, freshness: str = "pw"
+) -> list[dict[str, Any]]:
     """
     Search Brave News. Returns normalized dicts, or [] if unconfigured / on error.
     Retries once on HTTP 429 after a 2s delay.
+    ``freshness``: Brave codes ``pd`` (day), ``pw`` (week), ``pm`` (month).
     """
-    if not BRAVE_API_KEY:
+    api_key = _brave_api_key()
+    if not api_key:
+        logger.error("BRAVE_API_KEY is not set; Brave scraper returning no results")
         return []
 
     headers = {
         "Accept": "application/json",
         "Accept-Encoding": "gzip",
-        "X-Subscription-Token": BRAVE_API_KEY,
+        "X-Subscription-Token": api_key,
     }
-    params: dict[str, Any] = {"q": query, "count": count, "freshness": "pd"}
+    params: dict[str, Any] = {"q": query, "count": count, "freshness": freshness}
 
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
@@ -216,6 +266,7 @@ def _og_image(scraped: dict[str, Any] | None) -> str | None:
 
 def _result_to_article(result: dict[str, Any], scraped: dict[str, Any] | None) -> Article:
     url = result["url"]
+    cats = list(result.get("_query_cats") or [])
     return Article(
         title=result["title"] or "(no title)",
         url=url,
@@ -224,10 +275,10 @@ def _result_to_article(result: dict[str, Any], scraped: dict[str, Any] | None) -
         snippet=_snippet_for_article(result, scraped),
         full_text=_full_text(scraped),
         published_at=convert_age_to_iso(result.get("age") or ""),
-        fetched_at=datetime.utcnow().isoformat(),
+        fetched_at=datetime.now(timezone.utc).isoformat(),
         engagement=None,
         authors=[],
-        categories=[],
+        categories=cats,
         image_url=_og_image(scraped),
         extra=None,
     )
@@ -235,8 +286,9 @@ def _result_to_article(result: dict[str, Any], scraped: dict[str, Any] | None) -
 
 async def fetch_brave_articles(
     categories: list[str] | None = None,
-    results_per_query: int = 5,
+    results_per_query: int = 8,
     scrape_pages: bool = True,
+    freshness: str = "pw",
 ) -> list[Article]:
     """
     Fetch news via Brave (serialized: 1 req/s free tier), optionally enrich with page_scraper.
@@ -244,53 +296,78 @@ async def fetch_brave_articles(
     global _LAST_QUOTA_HEADERS
     _LAST_QUOTA_HEADERS = {}
 
-    if not BRAVE_API_KEY:
+    if not _brave_api_key():
+        logger.error("BRAVE_API_KEY is not set; Brave scraper returning no results")
         return []
 
     cats = categories if categories is not None else DEFAULT_CATEGORIES
     sem = asyncio.Semaphore(1)
     flat: list[dict[str, Any]] = []
     first = True
+    per_cat_raw: dict[str, int] = {}
 
     for cat in cats:
         queries = CATEGORY_QUERIES.get(cat)
         if not queries:
             logger.warning("Unknown category %r — skipping", cat)
             continue
+        slug = human_to_slug(cat) or cat
         for q in queries:
             if not first:
                 await asyncio.sleep(1)
             first = False
             logger.info("Brave query [%s]: %r", cat, q)
             async with sem:
-                batch = await search_brave_news(q, count=results_per_query)
-            flat.extend(batch)
+                batch = await search_brave_news(
+                    q, count=results_per_query, freshness=freshness
+                )
+            for item in batch:
+                row = dict(item)
+                row["_query_cats"] = merge_category_lists(row.get("_query_cats"), [slug])
+                flat.append(row)
+                per_cat_raw[slug] = per_cat_raw.get(slug, 0) + 1
 
     seen: set[str] = set()
     ordered: list[dict[str, Any]] = []
+    by_url: dict[str, dict[str, Any]] = {}
     for r in flat:
         u = (r.get("url") or "").strip()
-        if not u or u in seen:
+        if not u or not (u.startswith("http://") or u.startswith("https://")):
             continue
-        if not (u.startswith("http://") or u.startswith("https://")):
+        if u not in by_url:
+            by_url[u] = r
+        else:
+            by_url[u]["_query_cats"] = merge_category_lists(
+                by_url[u].get("_query_cats"), r.get("_query_cats")
+            )
+    for u, r in by_url.items():
+        if u in seen:
             continue
         seen.add(u)
         ordered.append(r)
 
+    logger.info("Brave raw hits per category: %s", per_cat_raw)
+    logger.info("Brave unique articles after dedupe: %s", len(ordered))
+
     scraped_by_url: dict[str, dict[str, Any]] = {}
     if scrape_pages and ordered:
-        top_urls = [r["url"] for r in ordered[:15]]
+        top_urls = [r["url"] for r in ordered[:30]]
         logger.info("Scraping top %d article URLs", len(top_urls))
         scrape_results = await scrape_multiple(top_urls, max_concurrent=3)
         scraped_by_url = {u: s for u, s in zip(top_urls, scrape_results)}
 
     articles: list[Article] = []
+    final_counts: dict[str, int] = {}
     for r in ordered:
         if not (r.get("title") or "").strip() and not (r.get("url") or "").strip():
             continue
         u = r.get("url") or ""
         scraped = scraped_by_url.get(u)
-        articles.append(_result_to_article(r, scraped))
+        art = _result_to_article(r, scraped)
+        articles.append(art)
+        for c in art.categories:
+            final_counts[c] = final_counts.get(c, 0) + 1
+    logger.info("Brave articles per category (after dedupe): %s", final_counts)
 
     return articles
 

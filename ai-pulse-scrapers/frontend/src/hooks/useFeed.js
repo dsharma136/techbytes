@@ -1,33 +1,68 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  categoriesPresentInFeed,
+  visibleCards,
+} from "../constants/categories.js";
 import { stableCardId } from "../utils/cardId.js";
 
-function normalizeCards(feedDate, rawCards) {
-  const list = Array.isArray(rawCards) ? rawCards : [];
+const INTRO_MIN_MS = 3500;
+const LOAD_TIMEOUT_MS = 15000;
+const INTRO_FADE_MS = 450;
+
+function prefersReducedMotion() {
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch {
+    return false;
+  }
+}
+
+function normalizeCards(feedDate, generatedAt, rawCards) {
+  const list = visibleCards(Array.isArray(rawCards) ? rawCards : []);
   return list.map((c, i) => ({
     ...c,
     id: stableCardId(feedDate, c, i),
+    published_at: c.published_at || generatedAt || null,
   }));
 }
 
-function applyPayload(data, setFeedDate, setCards, setErrors) {
+function applyPayload(data, setFeedDate, setGeneratedAt, setCards, setErrors) {
   const date = data?.date ?? null;
+  const generatedAt = data?.generated_at ?? null;
   setFeedDate(date);
-  setCards(normalizeCards(date, data?.cards));
+  setGeneratedAt(generatedAt);
+  setCards(normalizeCards(date, generatedAt, data?.cards));
   setErrors(Array.isArray(data?.errors) ? data.errors : []);
 }
 
+async function fetchStoredFeed() {
+  const res = await fetch("/api/cards/today");
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || res.statusText);
+  }
+  return res.json();
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
- * Cached-first feed: `/api/cards/today/cached` then `/api/cards/today` in background.
+ * Stored-feed only: one request on load, never triggers the pipeline.
+ * Branded intro (≥3.5s) then fade into the app; 15s hard timeout.
  */
 export function useFeed() {
   const [feedDate, setFeedDate] = useState(null);
+  const [generatedAt, setGeneratedAt] = useState(null);
   const [allCards, setAllCards] = useState([]);
   const [pipelineErrors, setPipelineErrors] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [introFading, setIntroFading] = useState(false);
   const [error, setError] = useState(null);
   const mounted = useRef(true);
+  const loadGen = useRef(0);
 
   useEffect(() => {
     mounted.current = true;
@@ -36,104 +71,114 @@ export function useFeed() {
     };
   }, []);
 
+  const categories = useMemo(
+    () => categoriesPresentInFeed(allCards),
+    [allCards],
+  );
+
+  useEffect(() => {
+    if (categories.length === 0) {
+      setActiveCategory(null);
+      return;
+    }
+    if (!activeCategory || !categories.includes(activeCategory)) {
+      setActiveCategory(categories[0]);
+    }
+  }, [categories, activeCategory]);
+
   const filterByCategory = useCallback((slug) => {
-    setActiveCategory(slug && slug !== "all" ? slug : null);
+    if (slug && typeof slug === "string") {
+      setActiveCategory(slug);
+    }
   }, []);
 
   const cards = useMemo(() => {
-    if (!activeCategory) return allCards;
+    if (!activeCategory) return [];
     return allCards.filter((c) => c.category === activeCategory);
   }, [allCards, activeCategory]);
 
-  const categories = useMemo(() => {
-    const s = new Set(allCards.map((c) => c.category).filter(Boolean));
-    return Array.from(s).sort();
-  }, [allCards]);
-
-  const runBackgroundToday = useCallback(async () => {
+  const finishIntro = useCallback(async () => {
     if (!mounted.current) return;
-    setRefreshing(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/cards/today");
-      if (!mounted.current) return;
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || res.statusText);
-      }
-      const data = await res.json();
-      if (!mounted.current) return;
-      applyPayload(data, setFeedDate, setAllCards, setPipelineErrors);
-    } catch (e) {
-      if (!mounted.current) return;
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      if (mounted.current) setRefreshing(false);
+    if (prefersReducedMotion()) {
+      setIntroFading(false);
+      setLoading(false);
+      return;
     }
+    setIntroFading(true);
+    await sleep(INTRO_FADE_MS);
+    if (!mounted.current) return;
+    setLoading(false);
+    setIntroFading(false);
   }, []);
+
+  const runInitialLoad = useCallback(async () => {
+    const gen = ++loadGen.current;
+    const started = Date.now();
+    setLoading(true);
+    setIntroFading(false);
+    setError(null);
+
+    const fetchPromise = fetchStoredFeed()
+      .then((data) => ({ ok: true, data }))
+      .catch((e) => ({
+        ok: false,
+        error: e instanceof Error ? e.message : String(e),
+      }));
+
+    await sleep(INTRO_MIN_MS);
+    if (!mounted.current || gen !== loadGen.current) return;
+
+    const elapsed = Date.now() - started;
+    const budget = Math.max(0, LOAD_TIMEOUT_MS - elapsed);
+
+    let result;
+    try {
+      result = await Promise.race([
+        fetchPromise,
+        sleep(budget).then(() => ({
+          ok: false,
+          error: "Today’s cards are taking longer than usual.",
+          timeout: true,
+        })),
+      ]);
+    } catch (e) {
+      result = {
+        ok: false,
+        error: e instanceof Error ? e.message : String(e),
+      };
+    }
+
+    if (!mounted.current || gen !== loadGen.current) return;
+
+    if (result.ok) {
+      applyPayload(
+        result.data,
+        setFeedDate,
+        setGeneratedAt,
+        setAllCards,
+        setPipelineErrors,
+      );
+      setError(null);
+      await finishIntro();
+      return;
+    }
+
+    setAllCards([]);
+    setFeedDate(null);
+    setGeneratedAt(null);
+    setPipelineErrors([]);
+    setError(result.error || "Today’s cards are taking longer than usual.");
+    setIntroFading(false);
+    setLoading(false);
+  }, [finishIntro]);
 
   useEffect(() => {
-    let cancelled = false;
+    runInitialLoad();
+  }, [runInitialLoad]);
 
-    async function init() {
-      setLoading(true);
-      setError(null);
-      try {
-        const cachedRes = await fetch("/api/cards/today/cached");
-        if (cancelled || !mounted.current) return;
-
-        if (cachedRes.ok) {
-          const data = await cachedRes.json();
-          if (cancelled || !mounted.current) return;
-          applyPayload(data, setFeedDate, setAllCards, setPipelineErrors);
-          setLoading(false);
-          runBackgroundToday();
-          return;
-        }
-
-        const todayRes = await fetch("/api/cards/today");
-        if (cancelled || !mounted.current) return;
-        if (!todayRes.ok) {
-          const text = await todayRes.text();
-          throw new Error(text || todayRes.statusText);
-        }
-        const data = await todayRes.json();
-        if (cancelled || !mounted.current) return;
-        applyPayload(data, setFeedDate, setAllCards, setPipelineErrors);
-      } catch (e) {
-        if (cancelled || !mounted.current) return;
-        setError(e instanceof Error ? e.message : String(e));
-        setAllCards([]);
-        setFeedDate(null);
-        setPipelineErrors([]);
-      } finally {
-        if (!cancelled && mounted.current) setLoading(false);
-      }
-    }
-
-    init();
-    return () => {
-      cancelled = true;
-    };
-  }, [runBackgroundToday]);
-
-  const refresh = useCallback(async () => {
-    setError(null);
-    setRefreshing(true);
-    try {
-      const res = await fetch("/api/cards/today");
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || res.statusText);
-      }
-      const data = await res.json();
-      applyPayload(data, setFeedDate, setAllCards, setPipelineErrors);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setRefreshing(false);
-    }
-  }, []);
+  const retryLoad = useCallback(async () => {
+    await runInitialLoad();
+  }, [runInitialLoad]);
 
   return {
     cards,
@@ -141,11 +186,12 @@ export function useFeed() {
     categories,
     activeCategory,
     feedDate,
+    generatedAt,
     pipelineErrors,
     loading,
-    refreshing,
+    introFading,
     error,
-    refresh,
+    retryLoad,
     filterByCategory,
   };
 }

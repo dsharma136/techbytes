@@ -1,0 +1,36 @@
+---
+description: Never call live TechBytes pipeline APIs unless explicitly asked; reuse stored feed for frontend work
+alwaysApply: true
+---
+
+# TechBytes: pipeline and live APIs
+
+TechBytes is a **daily digest**. The stored feed in `data/feeds/` (or Redis) is the source of truth for the app.
+
+## Never run live integrations unless the user explicitly asks
+
+Do **not** call Groq, Brave, Hacker News, or arXiv, and do **not** run the pipeline, unless the user clearly requests it in this turn. That includes:
+
+- `python -m backend.api.server --generate` (any flags)
+- `scripts/verify_pipeline.py` (full or LLM stages)
+- Live scraper scripts / `python -m tests.test_scrapers`
+- Any other scrape → cluster → card → corroboration run
+
+Default verification for most tasks: `npm run build` and **offline** pytest only (live scraper tests are skipped by default).
+
+## Frontend-only changes → reuse the stored feed
+
+If the change is only frontend (React, CSS, hooks, Vite, copy, layout), **do not regenerate**. Load against `/api/cards/today` and the existing feed JSON.
+
+## When the user does ask to regenerate
+
+Prefer a small test run first:
+
+```bash
+cd ai-pulse-scrapers
+python -m backend.api.server --generate --max-cards 5 --categories "AI/ML"
+```
+
+## Production gate
+
+Keep the under-construction gate in `frontend/src/main.jsx` unless the user explicitly asks to go live (`VITE_SITE_LIVE=true`).

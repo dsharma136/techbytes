@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import secrets
+import time
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -44,7 +45,6 @@ KNOWN_CATEGORY_SLUGS = frozenset(
         "networking_cloud",
         "cybersecurity",
         "autonomous_vehicles",
-        "dev_tools",
         "general",
     }
 )
@@ -217,7 +217,16 @@ def _state_to_response(
 ) -> DailyFeedResponse:
     raw_cards = state.get("feed_cards") or []
     errors = list(state.get("errors") or [])
-    cards = [FeedCard.model_validate(c) for c in raw_cards]
+    filled: list[dict] = []
+    for c in raw_cards:
+        if not isinstance(c, dict):
+            continue
+        d = dict(c)
+        # No dated sources → fall back to feed generation time.
+        if not d.get("published_at"):
+            d["published_at"] = generated_at
+        filled.append(d)
+    cards = [FeedCard.model_validate(c) for c in filled]
     return DailyFeedResponse(
         date=date_str,
         generated_at=generated_at,
@@ -227,13 +236,26 @@ def _state_to_response(
     )
 
 
-async def _run_pipeline_and_persist(date_str: str | None = None) -> DailyFeedResponse:
+async def _run_pipeline_and_persist(
+    date_str: str | None = None,
+    *,
+    categories: list[str] | None = None,
+    max_cards: int | None = None,
+) -> DailyFeedResponse:
     date_str = date_str or _utc_date_str()
     now_iso = datetime.now(timezone.utc).isoformat()
-    state = await generate_daily_feed()
+    target = int(max_cards) if max_cards is not None else 60
+    state = await generate_daily_feed(categories=categories, target_cards=target)
     resp = _state_to_response(state, date_str, now_iso, cached=False)
     await _save_feed(_store_payload(resp), date_str)
     return resp
+
+
+def _parse_categories_arg(raw: str | None) -> list[str] | None:
+    if not raw or not str(raw).strip():
+        return None
+    parts = [p.strip() for p in str(raw).split(",")]
+    return [p for p in parts if p]
 
 
 def _category_counts(cards: list[FeedCard]) -> list[CategoryCount]:
@@ -338,11 +360,48 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-async def _cli_generate() -> None:
+async def _cli_generate(
+    *,
+    categories: list[str] | None = None,
+    max_cards: int | None = None,
+) -> None:
+    from llm.processor import GroqDailyLimitError, get_run_token_totals, _log_run_stats
+
     date_str = _utc_date_str()
-    logger.info("Generating feed for %s …", date_str)
-    resp = await _run_pipeline_and_persist(date_str)
+    logger.info(
+        "Generating feed for %s … categories=%s max_cards=%s",
+        date_str,
+        categories or "(all)",
+        max_cards or "(default)",
+    )
+    t0 = time.perf_counter()
+    try:
+        resp = await _run_pipeline_and_persist(
+            date_str, categories=categories, max_cards=max_cards
+        )
+    except GroqDailyLimitError as e:
+        totals = get_run_token_totals()
+        logger.error("Generate aborted: %s", e)
+        logger.info(
+            "Tokens used before abort: total=%s (in=%s out=%s) calls=%s",
+            totals.get("total_tokens"),
+            totals.get("prompt_tokens"),
+            totals.get("completion_tokens"),
+            totals.get("calls"),
+        )
+        raise SystemExit(2) from e
+    elapsed = time.perf_counter() - t0
     store = "redis" if _redis_enabled() else str(_feed_path(date_str))
+    totals = get_run_token_totals()
+    _log_run_stats("cli-generate")
+    logger.info("Full pipeline complete: %s cards in %.1fs", len(resp.cards), elapsed)
+    logger.info(
+        "Groq token total for this run: %s (prompt=%s completion=%s, calls=%s)",
+        totals.get("total_tokens"),
+        totals.get("prompt_tokens"),
+        totals.get("completion_tokens"),
+        totals.get("calls"),
+    )
     logger.info("Saved %s cards to %s", len(resp.cards), store)
     if resp.errors:
         for e in resp.errors:
@@ -374,9 +433,24 @@ def main() -> None:
         action="store_true",
         help="Start uvicorn on 127.0.0.1:8000",
     )
+    parser.add_argument(
+        "--max-cards",
+        type=int,
+        default=None,
+        metavar="N",
+        help="With --generate: cap published cards (small test runs)",
+    )
+    parser.add_argument(
+        "--categories",
+        type=str,
+        default=None,
+        metavar="LIST",
+        help='With --generate: comma-separated human labels, e.g. "AI/ML,cybersecurity"',
+    )
     args = parser.parse_args()
     if args.generate:
-        asyncio.run(_cli_generate())
+        cats = _parse_categories_arg(args.categories)
+        asyncio.run(_cli_generate(categories=cats, max_cards=args.max_cards))
     else:
         _cli_serve()
 

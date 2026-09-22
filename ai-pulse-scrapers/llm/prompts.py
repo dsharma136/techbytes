@@ -17,8 +17,10 @@ Rules:
 - Each article belongs to exactly ONE cluster
 - Single-article clusters are fine
 - Assign each cluster a primary_category from:
-  ai_ml, chips_hardware, networking_cloud, cybersecurity, autonomous_vehicles, dev_tools, general
+  ai_ml, chips_hardware, networking_cloud, cybersecurity, autonomous_vehicles, general
+- Prefer a topic category over general whenever the articles fit a topic
 - Score importance 0.0-1.0 based on recency, engagement, and novelty
+- Do not merge unrelated stories into one cluster
 
 Return ONLY a valid JSON array, no markdown, no explanation:
 [
@@ -34,26 +36,40 @@ Return ONLY a valid JSON array, no markdown, no explanation:
 CARD_WRITER_PROMPT = """
 You write daily micro-learning cards for a tech-savvy audience. Each card teaches
 someone ONE thing about what happened in tech today. Your tone is clear, smart,
-and concise — like a brilliant friend explaining the news over coffee.
+and concise like a brilliant friend explaining the news over coffee.
 
-Here are story clusters with their articles:
+Here are story clusters with their source articles (titles and excerpts):
 {clusters_json}
 
-For each cluster, write a card with:
+Write exactly one card per cluster, in the same order. Echo each cluster's
+cluster_index in the output. For each card include:
+- cluster_index: the integer from the input cluster (required for matching)
 - headline: 1-2 lines, clear and factual, never clickbait
 - blurb: 2-3 sentences. The "one thing to know." Include at least one specific
-  fact, number, or name. Be specific — say "40% latency reduction" not "significant improvement."
-- why_it_matters: 1-2 sentences connecting to the bigger picture. Cross-sector
-  connections are gold (e.g., chip news → AI training costs → AV inference).
-  Make the reader think "oh, I didn't connect those dots."
-- category: one of ai_ml, chips_hardware, networking_cloud, cybersecurity, autonomous_vehicles, dev_tools, general
-- is_research_paper: true if primary source is ArXiv
+  fact, number, or name taken from the source excerpts.
+- why_it_matters: 1-2 sentences connecting to the bigger picture.
+- category: one of ai_ml, chips_hardware, networking_cloud, cybersecurity, autonomous_vehicles, general
+- is_research_paper: true if the primary source is ArXiv
+
+Accuracy rules (mandatory):
+- Use ONLY the articles listed under that cluster. Do not mix facts across clusters.
+- Every claim, product name, model name, company name, number, and statistic MUST
+  appear in the provided source titles or excerpts for that cluster.
+- Do NOT invent, guess, or "correct" names (for example, do not upgrade a model
+  to a newer generation if the sources do not say that).
+- Do NOT swap roles of products or models if the sources describe them differently.
+- If sources disagree on a detail (dates, numbers, names, outcomes), omit that
+  detail rather than stating it as fact.
+- If the sources are thin, write a narrower card that only states what they support.
+- Prefer quoting concrete details from the excerpts over general commentary.
+- Do not write two cards about the same story; each cluster is a distinct story.
 
 No filler. No "in a move that..." No "it remains to be seen..."
 
-Return ONLY a valid JSON array:
+Return ONLY a valid JSON array with the same length as the input clusters:
 [
   {{
+    "cluster_index": 0,
     "headline": "...",
     "blurb": "...",
     "why_it_matters": "...",

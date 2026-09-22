@@ -16,6 +16,21 @@ from cache.file_cache import cached
 from .page_scraper import scrape_multiple
 from .schema import Article
 
+try:
+    from llm.quotas import human_to_slug, merge_category_lists
+except ImportError:  # pragma: no cover
+    def human_to_slug(label: str) -> str | None:  # type: ignore[misc]
+        return None
+
+    def merge_category_lists(*lists: list[str] | None) -> list[str]:  # type: ignore[misc]
+        out: list[str] = []
+        for lst in lists:
+            for c in lst or []:
+                if c not in out:
+                    out.append(c)
+        return out
+
+
 logger = logging.getLogger(__name__)
 
 HN_ALGOLIA_SEARCH = "http://hn.algolia.com/api/v1/search"
@@ -26,7 +41,6 @@ DEFAULT_CATEGORIES = [
     "networking & cloud",
     "cybersecurity",
     "autonomous vehicles",
-    "dev tools",
 ]
 
 CATEGORY_QUERIES: dict[str, list[str]] = {
@@ -37,6 +51,8 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "GPT",
         "deep learning",
         "Claude AI",
+        "OpenAI",
+        "Anthropic",
     ],
     "chips & hardware": [
         "semiconductor",
@@ -47,6 +63,10 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "chip",
         "Intel",
         "Apple silicon",
+        "chip fabrication",
+        "semiconductor export",
+        "foundry",
+        "HBM memory",
     ],
     "networking & cloud": [
         "data center",
@@ -56,6 +76,7 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "cloud infrastructure",
         "AWS",
         "Cloudflare",
+        "Kubernetes",
     ],
     "cybersecurity": [
         "cybersecurity",
@@ -64,6 +85,7 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "CrowdStrike",
         "data breach",
         "CVE",
+        "vulnerability",
     ],
     "autonomous vehicles": [
         "self-driving",
@@ -72,14 +94,10 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "robotaxi",
         "Tesla FSD",
         "lidar",
-    ],
-    "dev tools": [
-        "developer tools",
-        "Cursor IDE",
-        "GitHub Copilot",
-        "open source",
-        "Rust",
-        "WebAssembly",
+        "AV safety",
+        "self-driving software",
+        "AV regulation",
+        "autonomous trucking",
     ],
 }
 
@@ -167,6 +185,7 @@ def _image_from_scrape(scraped: dict[str, Any] | None) -> str | None:
 
 def _hit_to_article(hit: dict[str, Any], scraped: dict[str, Any] | None) -> Article:
     title = hit["title"] or "(no title)"
+    cats = list(hit.get("_query_cats") or [])
     return Article(
         title=title,
         url=hit["url"],
@@ -178,7 +197,7 @@ def _hit_to_article(hit: dict[str, Any], scraped: dict[str, Any] | None) -> Arti
         fetched_at=datetime.now(timezone.utc).isoformat(),
         engagement={"points": hit["points"], "comments": hit["num_comments"]},
         authors=[hit["author"]] if hit.get("author") else [],
-        categories=[],
+        categories=cats,
         image_url=_image_from_scrape(scraped),
         extra={"hn_url": f"https://news.ycombinator.com/item?id={hit['objectID']}"},
     )
@@ -186,57 +205,82 @@ def _hit_to_article(hit: dict[str, Any], scraped: dict[str, Any] | None) -> Arti
 
 async def fetch_hn_articles(
     categories: list[str] | None = None,
-    hours_back: int = 48,
-    max_per_query: int = 10,
+    hours_back: int = 168,
+    max_per_query: int = 12,
     scrape_pages: bool = True,
 ) -> list[Article]:
     """Main entry point. Returns Article objects matching the shared schema."""
     cats = categories if categories is not None else DEFAULT_CATEGORIES
     all_hits: list[dict[str, Any]] = []
+    per_cat_raw: dict[str, int] = {}
 
     for cat in cats:
         queries = CATEGORY_QUERIES.get(cat)
         if not queries:
             logger.warning("Unknown category %r — skipping", cat)
             continue
+        slug = human_to_slug(cat) or cat
         logger.info("Category %r: running %d queries concurrently", cat, len(queries))
         batches = await asyncio.gather(
             *[
                 search_hn(
                     q,
-                    min_points=10,
+                    min_points=5,
                     hours_back=hours_back,
                     max_results=max_per_query,
                 )
                 for q in queries
             ]
         )
+        n_batch = 0
         for batch in batches:
-            all_hits.extend(batch)
+            for h in batch:
+                row = dict(h)
+                row["_query_cats"] = merge_category_lists(row.get("_query_cats"), [slug])
+                all_hits.append(row)
+                n_batch += 1
+        per_cat_raw[slug] = per_cat_raw.get(slug, 0) + n_batch
 
     by_url: dict[str, dict[str, Any]] = {}
     for h in all_hits:
         u = h["url"]
-        if u not in by_url or h["points"] > by_url[u]["points"]:
+        if u not in by_url:
             by_url[u] = h
+            continue
+        existing = by_url[u]
+        if h["points"] > existing["points"]:
+            # Winner keeps its primary category first.
+            cats = merge_category_lists(h.get("_query_cats"), existing.get("_query_cats"))
+            by_url[u] = h
+            by_url[u]["_query_cats"] = cats
+        else:
+            by_url[u]["_query_cats"] = merge_category_lists(
+                existing.get("_query_cats"), h.get("_query_cats")
+            )
 
     sorted_hits = sorted(by_url.values(), key=lambda x: x["points"], reverse=True)
     logger.info("After dedupe: %d unique stories (by points desc)", len(sorted_hits))
+    logger.info("HN raw hits per category: %s", per_cat_raw)
 
     scraped_by_url: dict[str, dict[str, Any]] = {}
     if scrape_pages and sorted_hits:
-        top_urls = [h["url"] for h in sorted_hits[:20]]
+        top_urls = [h["url"] for h in sorted_hits[:40]]
         logger.info("Scraping top %d URLs (page content)", len(top_urls))
         scrape_results = await scrape_multiple(top_urls, max_concurrent=3)
         scraped_by_url = {u: r for u, r in zip(top_urls, scrape_results)}
 
     articles: list[Article] = []
+    final_counts: dict[str, int] = {}
     for h in sorted_hits:
         if not (h.get("title") or "").strip():
             logger.warning("Skipping hit with empty title objectID=%s", h.get("objectID"))
             continue
         scraped = scraped_by_url.get(h["url"])
-        articles.append(_hit_to_article(h, scraped))
+        art = _hit_to_article(h, scraped)
+        articles.append(art)
+        for c in art.categories:
+            final_counts[c] = final_counts.get(c, 0) + 1
+    logger.info("HN articles per category (after dedupe): %s", final_counts)
 
     return articles
 

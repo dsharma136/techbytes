@@ -3,6 +3,9 @@ Live integration tests for scrapers (real APIs, no mocks).
 
 Run from project root:
     python -m tests.test_scrapers
+
+These are skipped under normal ``pytest`` so offline CI / local runs never
+hit Groq, Brave, Hacker News, or arXiv.
 """
 
 from __future__ import annotations
@@ -11,12 +14,17 @@ import asyncio
 import os
 import sys
 
+import pytest
 from dotenv import load_dotenv
 
 from scrapers.arxiv_scraper import fetch_arxiv_articles
 from scrapers.brave_scraper import fetch_brave_articles
 from scrapers.hn_scraper import fetch_hn_articles
 from scrapers.schema import Article, validate_articles
+
+pytestmark = pytest.mark.skip(
+    reason="Live API integration — run manually: python -m tests.test_scrapers"
+)
 
 load_dotenv()
 

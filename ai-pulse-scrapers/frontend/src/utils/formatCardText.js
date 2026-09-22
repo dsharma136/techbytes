@@ -20,6 +20,6 @@ export function formatCardPlainText(card) {
       lines.push(u ? `${t} — ${u}` : t);
     }
   }
-  lines.push("", "— AI Pulse");
+  lines.push("", "- TechBytes");
   return lines.filter(Boolean).join("\n").replace(/\n\n\n+/g, "\n\n");
 }

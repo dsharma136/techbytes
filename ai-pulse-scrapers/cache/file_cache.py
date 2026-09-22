@@ -27,8 +27,8 @@ __all__ = [
 
 
 def _cache_disabled() -> bool:
-    """Vercel filesystem is read-only; skip all file cache I/O there."""
-    return bool(os.environ.get("VERCEL"))
+    """Skip file cache on Vercel or when explicitly disabled (e.g. verify runs)."""
+    return bool(os.environ.get("VERCEL") or os.environ.get("AI_PULSE_NO_CACHE"))
 
 
 def make_key(prefix: str, *args) -> str:
