@@ -66,7 +66,7 @@ class FeedCard(BaseModel):
     @field_validator("sources", mode="before")
     @classmethod
     def _sources_default(cls, v: object) -> object:
-        if v is None:
+        if not isinstance(v, list):
             return []
         return v
 

@@ -121,7 +121,7 @@ export function useFeed() {
     setError(null);
     setRefreshing(true);
     try {
-      const res = await fetch("/api/cards/refresh", { method: "POST" });
+      const res = await fetch("/api/cards/today");
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || res.statusText);

@@ -1,0 +1,13 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/generate",
+      "schedule": "0 12 * * *"
+    }
+  ],
+  "functions": {
+    "backend/api/server.py": {
+      "maxDuration": 300
+    }
+  }
+}

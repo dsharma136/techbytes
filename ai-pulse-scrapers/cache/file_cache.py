@@ -7,6 +7,7 @@ import hashlib
 import inspect
 import json
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -25,6 +26,11 @@ __all__ = [
 ]
 
 
+def _cache_disabled() -> bool:
+    """Vercel filesystem is read-only; skip all file cache I/O there."""
+    return bool(os.environ.get("VERCEL"))
+
+
 def make_key(prefix: str, *args) -> str:
     """Combine prefix + str(args), SHA256 hash, return hex digest."""
     combined = prefix + str(args)
@@ -32,6 +38,8 @@ def make_key(prefix: str, *args) -> str:
 
 
 def get(key: str, ttl_hours: int = 12) -> Any | None:
+    if _cache_disabled():
+        return None
     path = CACHE_DIR / f"{key}.json"
     if not path.is_file():
         return None
@@ -59,6 +67,8 @@ def get(key: str, ttl_hours: int = 12) -> Any | None:
 
 
 def put(key: str, data: Any) -> None:
+    if _cache_disabled():
+        return
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     path = CACHE_DIR / f"{key}.json"
     payload = {
@@ -112,6 +122,8 @@ def cached(prefix: str, ttl_hours: int = 12):
 
 def clear() -> int:
     """Delete all files in CACHE_DIR; return number removed."""
+    if _cache_disabled():
+        return 0
     if not CACHE_DIR.exists():
         return 0
     n = 0
