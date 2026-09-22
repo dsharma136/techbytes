@@ -1,0 +1,222 @@
+{
+  "date": "2026-04-04",
+  "generated_at": "2026-04-04T20:20:39.741918+00:00",
+  "cards": [
+    {
+      "headline": "AI Model Restrictions: Anthropic Limits Claude Code Subscriptions",
+      "blurb": "Anthropic is no longer allowing Claude Code subscriptions to use OpenClaw due to a privilege escalation vulnerability. This change affects users who rely on OpenClaw for their AI models. The vulnerability was recently discovered and reported.",
+      "why_it_matters": "This restriction highlights the importance of security in AI development, as vulnerabilities can have significant consequences for users and organizations. It also underscores the need for ongoing monitoring and updates in the rapidly evolving AI landscape.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 1,
+      "sources": [
+        {
+          "title": "Tell HN: Anthropic no longer allowing Claude Code subscriptions to use OpenClaw",
+          "url": "https://news.ycombinator.com/item?id=47633396",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 982,
+            "comments": 755
+          }
+        },
+        {
+          "title": "OpenClaw privilege escalation vulnerability",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-33579",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 489,
+            "comments": 230
+          }
+        }
+      ],
+      "importance_score": 0.7,
+      "cluster_title": "AI Model Restrictions"
+    },
+    {
+      "headline": "Event-Based Stereo Networks Advance with EventHub",
+      "blurb": "EventHub is a new data factory for generalizable event-based stereo networks that doesn't require active sensors. This innovation enables more efficient and flexible event-based stereo vision. EventHub's approach can be applied to various applications, including robotics and autonomous vehicles.",
+      "why_it_matters": "The development of EventHub has implications for the advancement of autonomous vehicles and robotics, where event-based stereo vision can improve navigation and perception capabilities. This technology can also reduce the complexity and cost of traditional stereo vision systems.",
+      "category": "ai_ml",
+      "is_research_paper": true,
+      "order": 2,
+      "sources": [
+        {
+          "title": "EventHub: Data Factory for Generalizable Event-Based Stereo Networks without Active Sensors",
+          "url": "http://arxiv.org/abs/2604.02331v1",
+          "source_type": "arxiv",
+          "source_name": "ArXiv",
+          "engagement": null
+        }
+      ],
+      "importance_score": 0.7,
+      "cluster_title": "Event-Based Stereo Networks"
+    },
+    {
+      "headline": "Generative Video Games: ActionParty Introduces Multi-Subject Action Binding",
+      "blurb": "ActionParty is a new approach to generative video games that enables multi-subject action binding. This allows for more dynamic and interactive game experiences. ActionParty's technology can be used to create a wide range of games and simulations.",
+      "why_it_matters": "The introduction of ActionParty has the potential to revolutionize the gaming industry by enabling more immersive and engaging experiences. This technology can also be applied to other fields, such as education and training, where interactive simulations can enhance learning outcomes.",
+      "category": "ai_ml",
+      "is_research_paper": true,
+      "order": 3,
+      "sources": [
+        {
+          "title": "ActionParty: Multi-Subject Action Binding in Generative Video Games",
+          "url": "http://arxiv.org/abs/2604.02330v1",
+          "source_type": "arxiv",
+          "source_name": "ArXiv",
+          "engagement": null
+        }
+      ],
+      "importance_score": 0.7,
+      "cluster_title": "Generative Video Games"
+    },
+    {
+      "headline": "Space Exploration: Artemis II Crew Captures Stunning Image of Earth",
+      "blurb": "The Artemis II crew has taken a 'spectacular' image of Earth from space. This image was captured during the crew's mission to test the Orion spacecraft and its systems. The image provides a unique perspective on our planet and its place in the universe.",
+      "why_it_matters": "The success of the Artemis II mission has significant implications for future space exploration, including the potential for manned missions to the Moon and beyond. The images and data captured during this mission can also contribute to our understanding of the Earth and its systems.",
+      "category": "general",
+      "is_research_paper": false,
+      "order": 4,
+      "sources": [
+        {
+          "title": "Artemis II crew take “spectacular” image of Earth",
+          "url": "https://www.bbc.com/news/articles/ce8jzr423p9o",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 988,
+            "comments": 341
+          }
+        }
+      ],
+      "importance_score": 0.6,
+      "cluster_title": "Space Exploration"
+    },
+    {
+      "headline": "Semiconductor Industry Growth Opportunities",
+      "blurb": "Experts are highlighting high-growth opportunities in the semiconductor industry, driven by increasing demand for chips in various applications. The industry is expected to experience significant growth in the coming years, with opportunities for innovation and investment. According to experts, the industry's growth will be driven by emerging technologies such as AI and 5G.",
+      "why_it_matters": "The growth of the semiconductor industry has significant implications for the development of emerging technologies, such as AI and autonomous vehicles, which rely heavily on advanced chips. The industry's growth can also drive innovation and investment in other sectors, such as manufacturing and logistics.",
+      "category": "chips_hardware",
+      "is_research_paper": false,
+      "order": 5,
+      "sources": [
+        {
+          "title": "Experts highlight high-growth opportunities in semiconductor industry - The Hindu",
+          "url": "https://www.thehindu.com/news/national/tamil-nadu/experts-highlight-high-growth-opportunities-in-semiconductor-industry/article70823812.ece",
+          "source_type": "brave",
+          "source_name": "thehindu.com",
+          "engagement": null
+        }
+      ],
+      "importance_score": 0.6,
+      "cluster_title": "Semiconductor Industry Growth"
+    },
+    {
+      "headline": "Secondary Eclipse Photometry: New Insights from JWST/MIRI",
+      "blurb": "A new study using JWST/MIRI has provided insights into the secondary eclipse photometry of GJ 3473 b. The study used data from the Hot Rocks Survey to analyze the exoplanet's properties. The results of the study contribute to our understanding of exoplanetary systems and their formation.",
+      "why_it_matters": "The study of exoplanetary systems has significant implications for our understanding of the universe and its many mysteries. The use of advanced telescopes and instruments, such as JWST/MIRI, can provide new insights into the properties and behavior of exoplanets, and shed light on the formation and evolution of planetary systems.",
+      "category": "general",
+      "is_research_paper": true,
+      "order": 6,
+      "sources": [
+        {
+          "title": "Hot Rocks Survey V: Secondary Eclipse Photometry of GJ 3473 b with JWST/MIRI",
+          "url": "http://arxiv.org/abs/2604.02332v1",
+          "source_type": "arxiv",
+          "source_name": "ArXiv",
+          "engagement": null
+        }
+      ],
+      "importance_score": 0.6,
+      "cluster_title": "Secondary Eclipse Photometry"
+    },
+    {
+      "headline": "Drone Regulations: FAA Restricts Filming of ICE Activities",
+      "blurb": "The FAA has introduced a flight restriction for drones that aims to prevent the filming of ICE activities. The restriction has been criticized for attempting to criminalize the use of drones for journalism and activism. The restriction applies to certain areas and activities, and drone operators must comply with the new rules.",
+      "why_it_matters": "The introduction of this restriction has significant implications for the use of drones in journalism and activism, and raises concerns about freedom of speech and the right to document public activities. The restriction can also have implications for the development of drone technology and its applications in various fields.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 7,
+      "sources": [
+        {
+          "title": "The FAA’s flight restriction for drones is an attempt to criminalize filming ICE",
+          "url": "https://www.eff.org/deeplinks/2026/04/faas-temporary-flight-restriction-drones-blatant-attempt-criminalize-filming-ice",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 512,
+            "comments": 172
+          }
+        }
+      ],
+      "importance_score": 0.5,
+      "cluster_title": "Drone Regulations"
+    },
+    {
+      "headline": "European Alternatives to US Apps",
+      "blurb": "There are now European alternatives to over 120 US apps, including Google, Apple, and Dropbox. These alternatives provide users with more options and can reduce dependence on US-based services. The alternatives include a range of apps and services, from productivity tools to social media platforms.",
+      "why_it_matters": "The development of European alternatives to US apps has significant implications for data sovereignty and the digital economy. The availability of alternative apps and services can also drive innovation and competition in the tech industry, and provide users with more choices and better services.",
+      "category": "general",
+      "is_research_paper": false,
+      "order": 8,
+      "sources": [
+        {
+          "title": "European alternatives to Google, Apple, Dropbox and 120 US apps",
+          "url": "https://only-eu.eu/en/",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 360,
+            "comments": 156
+          }
+        }
+      ],
+      "importance_score": 0.5,
+      "cluster_title": "European Alternatives to US Apps"
+    },
+    {
+      "headline": "AI Stock Comparison: Nvidia vs AMD",
+      "blurb": "ChatGPT has compared Nvidia and AMD as AI stocks for Q2 2026, providing insights into their potential performance. The comparison highlights the strengths and weaknesses of each company, and provides guidance for investors. According to ChatGPT, Nvidia's dominance in the AI market gives it an edge over AMD.",
+      "why_it_matters": "The comparison of Nvidia and AMD as AI stocks has significant implications for investors and the tech industry. The performance of these companies can drive innovation and investment in AI research and development, and shape the future of the tech industry.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 9,
+      "sources": [
+        {
+          "title": "Nvidia or AMD? We asked ChatGPT which is the better AI stock for Q2 2026",
+          "url": "https://finbold.com/nvidia-or-amd-we-asked-chatgpt-which-is-the-better-ai-stock-for-q2-2026",
+          "source_type": "brave",
+          "source_name": "finbold.com",
+          "engagement": null
+        }
+      ],
+      "importance_score": 0.5,
+      "cluster_title": "AI Stock Comparison"
+    },
+    {
+      "headline": "AI on Mac: Apfel Brings AI to macOS",
+      "blurb": "Apfel is a new AI tool that is already available on Mac devices. The tool provides users with a range of AI-powered features and capabilities, and can be used for various tasks and applications. Apfel is free and can be used by anyone with a Mac.",
+      "why_it_matters": "The availability of Apfel on Mac devices has significant implications for the development of AI on macOS, and provides users with more options and capabilities. The integration of AI into macOS can also drive innovation and investment in AI research and development, and shape the future of the tech industry.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 10,
+      "sources": [
+        {
+          "title": "Show HN: Apfel – The free AI already on your Mac",
+          "url": "https://apfel.franzai.com",
+          "source_type": "hackernews",
+          "source_name": "HackerNews",
+          "engagement": {
+            "points": 699,
+            "comments": 144
+          }
+        }
+      ],
+      "importance_score": 0.4,
+      "cluster_title": "AI on Mac"
+    }
+  ],
+  "errors": []
+}
