@@ -22,8 +22,8 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
-# Groq free tier: stay under TPM — tight prompts + output caps.
-GROQ_MODEL = "llama-3.3-70b-versatile"
+# Override with GROQ_MODEL if Groq renames or restricts the default.
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
 TOKEN_BUDGET_CEILING = 10_000
 CLUSTER_MAX_OUT = 2000
 CARDS_MAX_OUT = 3000
