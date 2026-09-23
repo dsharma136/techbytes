@@ -970,6 +970,94 @@ def _probe_store_and_api(cards: list[dict[str, Any]], date_str: str) -> None:
         )
 
 
+def _probe_feed_quality(cards: list[dict[str, Any]]) -> None:
+    """Offline quality flags: category, off-topic, mixed clusters, weak corr, meta."""
+    from llm.quality import MAX_SOURCES_PER_CARD, audit_feed_cards
+    from llm.quotas import MIN_TOTAL_CARDS, TOPIC_CATEGORY_SLUGS
+
+    flags = audit_feed_cards(cards)
+    cats: Counter[str] = Counter(str(c.get("category")) for c in cards if isinstance(c, dict))
+    missing_av = cats.get("autonomous_vehicles", 0) < 5
+    low_total = len(cards) < MIN_TOTAL_CARDS
+
+    for kind, rows in flags.items():
+        if not rows:
+            _pass(f"quality:{kind}", "none flagged")
+            continue
+        samples = [
+            f"#{r.get('index')} [{r.get('category')}] {r.get('headline')}"
+            + (f" -> {r.get('suggested')}" if r.get("suggested") else "")
+            + (f" weak={r.get('weak')}" if r.get("weak") else "")
+            for r in rows[:6]
+        ]
+        _fail(
+            f"quality:{kind}",
+            f"{len(rows)} card(s) flagged",
+            samples,
+        )
+
+    if missing_av:
+        _fail(
+            "quality:av_floor",
+            f"autonomous_vehicles={cats.get('autonomous_vehicles', 0)} (want >=5)",
+        )
+    else:
+        _pass("quality:av_floor", f"autonomous_vehicles={cats.get('autonomous_vehicles', 0)}")
+
+    if low_total:
+        _fail("quality:total_floor", f"total={len(cards)} < {MIN_TOTAL_CARDS}")
+    else:
+        _pass("quality:total_floor", f"total={len(cards)} (min {MIN_TOTAL_CARDS})")
+
+    over = [
+        f"#{i} sources={len(c.get('sources') or [])}"
+        for i, c in enumerate(cards)
+        if isinstance(c, dict) and len(c.get("sources") or []) > MAX_SOURCES_PER_CARD
+    ]
+    if over:
+        _warn("quality:source_cap", f">{MAX_SOURCES_PER_CARD} sources", over[:4])
+
+    # Surface category spread for the report.
+    _warn(
+        "quality:category_spread",
+        str(dict(cats)),
+        [s for s in TOPIC_CATEGORY_SLUGS if cats.get(s, 0) == 0],
+    )
+
+
+def _run_fixture_audit(path: Path) -> int:
+    """Audit a saved feed JSON without calling live APIs or Groq."""
+    _report["generated_at"] = datetime.now(timezone.utc).isoformat()
+    _report["skip_llm"] = True
+    _report["fixture"] = str(path)
+    if not path.is_file():
+        _fail("fixture", f"missing file: {path}")
+        return 1
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        _fail("fixture", f"invalid JSON: {e}")
+        return 1
+    cards = data.get("cards") if isinstance(data, dict) else None
+    if not isinstance(cards, list):
+        _fail("fixture", "no cards array")
+        return 1
+    _pass("fixture", f"{path.name} cards={len(cards)} date={data.get('date')}")
+    print("\n=== Offline feed quality ===")
+    _probe_feed_quality(cards)
+    _probe_frontend_contract(cards)
+
+    fails = sum(1 for c in _checks if c["status"] == "FAIL")
+    warns = sum(1 for c in _checks if c["status"] == "WARN")
+    passes = sum(1 for c in _checks if c["status"] == "PASS")
+    _report["summary"] = {"pass": passes, "warn": warns, "fail": fails}
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    REPORT_PATH.write_text(json.dumps(_report, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"\nSummary: PASS={passes} WARN={warns} FAIL={fails}")
+    print(f"Full report: {REPORT_PATH}")
+    return 1 if fails else 0
+
+
 async def _async_main(skip_llm: bool) -> int:
     _report["generated_at"] = datetime.now(timezone.utc).isoformat()
     _report["skip_llm"] = skip_llm
@@ -1007,6 +1095,7 @@ async def _async_main(skip_llm: bool) -> int:
             cards, working = await _probe_llm(all_articles)
             _probe_cards(cards, all_articles)
             _probe_card_grounding(cards, working)
+            _probe_feed_quality(cards)
             _probe_frontend_contract(cards)
             print("\n=== Store + API ===")
             date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -1031,12 +1120,21 @@ def main() -> None:
         action="store_true",
         help="Only check scrapers / page scraper (no Groq tokens)",
     )
+    parser.add_argument(
+        "--fixture",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Offline audit of a saved feed JSON (no live APIs / Groq)",
+    )
     args = parser.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         try:
             sys.stdout.reconfigure(encoding="utf-8")
         except Exception:
             pass
+    if args.fixture:
+        raise SystemExit(_run_fixture_audit(Path(args.fixture)))
     raise SystemExit(asyncio.run(_async_main(skip_llm=args.skip_llm)))
 
 

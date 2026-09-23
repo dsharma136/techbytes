@@ -121,6 +121,36 @@ def test_same_story_match_requires_shared_cues():
         seed_dates=["2026-09-20T12:00:00+00:00"],
         candidate_published_at="2026-09-21T08:00:00+00:00",
     )
+    assert not same_story_match(
+        cluster_title="China semiconductor export controls",
+        seed_titles=["US tightens China chip export rules"],
+        candidate_title="Top 17 China Wholesale Websites",
+        seed_dates=["2026-09-20T12:00:00+00:00"],
+        candidate_published_at="2026-09-21T08:00:00+00:00",
+        candidate_url="https://example.com/top-wholesale",
+    )
+
+
+def test_feed_quality_audit_flags_fixture_problems():
+    import json
+    from pathlib import Path
+
+    from llm.quality import audit_feed_cards
+
+    path = Path(__file__).resolve().parent / "fixtures" / "feed_2026-09-23.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    flags = audit_feed_cards(data["cards"])
+    # Production fixture is known-bad; at least one family should fire.
+    assert any(flags[k] for k in flags)
+    assert flags["category_mismatch"] or flags["off_topic"] or flags["mixed_cluster"]
+
+
+def test_meta_language_and_category_suggest():
+    from llm.quality import has_meta_language, suggest_category
+
+    assert has_meta_language("A Hacker News post says OpenAI shipped a model")
+    assert suggest_category("Waymo expands robotaxi service in Austin") == "autonomous_vehicles"
+    assert suggest_category("Disney+ raises subscription price for ad tier") == "not_tech_news"
 
 
 def test_groq_daily_limit_detection():

@@ -201,6 +201,7 @@ async def corroborate_clusters(
                 candidate_title=title,
                 seed_dates=seed_dates,
                 candidate_published_at=pub,
+                candidate_url=url,
             ):
                 continue
 

@@ -109,6 +109,13 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "AV regulation news",
         "autonomous trucking news",
         "lidar robotaxi",
+        "self-driving car news",
+        "autonomous truck news",
+        "delivery robot news",
+        "drone delivery robot",
+        "DJI drone FCC",
+        "vehicle cybersecurity AV",
+        "robotaxi regulation",
     ],
 }
 

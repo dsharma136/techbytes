@@ -98,6 +98,14 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "self-driving software",
         "AV regulation",
         "autonomous trucking",
+        "self-driving car",
+        "autonomous truck",
+        "delivery robot",
+        "drone delivery",
+        "DJI drone",
+        "FCC drone",
+        "vehicle cybersecurity",
+        "robotaxi regulation",
     ],
 }
 

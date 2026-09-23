@@ -1,0 +1,283 @@
+{
+  "date": "2026-09-23",
+  "generated_at": "2026-09-23T16:48:45.214564+00:00",
+  "cards": [
+    {
+      "headline": "Security researchers used Anthropic’s Claude to breach OpenAI systems",
+      "blurb": "Researchers leveraged the AI assistant Claude to exploit vulnerabilities in OpenAI’s internal infrastructure, gaining access to employee accounts and an internal code repository. OpenAI awarded the team a $6,500 bug bounty after the flaws were reported.",
+      "why_it_matters": "The incident shows that advanced AI agents can become tools for attackers, raising new security challenges for AI‑driven services.",
+      "category": "ai_ml",
+      "is_research_paper": false,
+      "order": 1,
+      "sources": [
+        {
+          "title": "We got a cybersecurity expert to hack this BYD. It was too easy",
+          "url": "https://www.abc.net.au/news/2026-09-21/byd-hacked-by-cybersecurity-expert-vehicle-sabotage-surveillance/107139482",
+          "source_type": "hackernews",
+          "source_name": "abc.net.au",
+          "engagement": {
+            "points": 20,
+            "comments": 4
+          },
+          "published_at": "2026-09-20T20:28:32+00:00"
+        },
+        {
+          "title": "Security Researchers Hacked Into OpenAI Using Anthropic’s Claude",
+          "url": "https://www.forbes.com/sites/siladityaray/2026/09/18/security-researchers-hacked-into-openai-using-anthropics-claude/",
+          "source_type": "brave",
+          "source_name": "forbes.com",
+          "engagement": null,
+          "published_at": "2026-09-18T16:49:26.996471+00:00"
+        },
+        {
+          "title": "Researchers used Anthropic's Claude to hack into OpenAI | TechCrunch",
+          "url": "https://techcrunch.com/2026/09/18/researchers-used-anthropics-claude-to-hack-into-openai/",
+          "source_type": "brave",
+          "source_name": "techcrunch.com",
+          "engagement": null,
+          "published_at": "2026-09-18T16:49:26.996533+00:00"
+        }
+      ],
+      "importance_score": 0.8999999999999999,
+      "published_at": "2026-09-20T20:28:32+00:00",
+      "cluster_title": "Security researchers easily hack BYD vehicle",
+      "single_source": false
+    },
+    {
+      "headline": "Amazon’s Prime Air drone tests spark complaints in a Texas suburb",
+      "blurb": "Residents living under the flight path of Amazon’s test city have reported frequent drone deliveries that disrupt daily life. The community’s frustration highlights early‑stage growing pains of the company’s aerial delivery program.",
+      "why_it_matters": "Public pushback could slow rollout of drone logistics, influencing how regulators and companies address noise, safety, and neighborhood impact.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 2,
+      "sources": [
+        {
+          "title": "It's Raining Boxes: Amazon Drones Overwhelm a Texas Suburb",
+          "url": "https://www.nytimes.com/2026/09/21/us/politics/amazon-drone-delivery-texas.html",
+          "source_type": "hackernews",
+          "source_name": "nytimes.com",
+          "engagement": {
+            "points": 6,
+            "comments": 1
+          },
+          "published_at": "2026-09-22T14:40:52+00:00"
+        },
+        {
+          "title": "Amazon drone deliveries have arrived; residents are already annoyed - TheStreet",
+          "url": "https://thestreet.com/retail/amazon-drone-deliveries-residents-annoyed-complain",
+          "source_type": "brave",
+          "source_name": "thestreet.com",
+          "engagement": null,
+          "published_at": "2026-09-22T23:49:18.745109+00:00"
+        }
+      ],
+      "importance_score": 0.89,
+      "published_at": "2026-09-22T23:49:18.745109+00:00",
+      "cluster_title": "Amazon drone deliveries cause neighborhood disruption in Texas",
+      "single_source": false
+    },
+    {
+      "headline": "InstinctFlash released as a high‑performance serving runtime for robotics models",
+      "blurb": "The open‑source InstinctFlash project provides a low‑latency runtime that integrates real‑time hardware control, motion planning, perception, and ROS 2 interoperability under an Apache 2.0 license. It is positioned as a local runtime for industrial robotics workloads.",
+      "why_it_matters": "A faster, unified serving layer can accelerate deployment of complex robotics AI, narrowing the gap between model development and real‑world operation.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 3,
+      "sources": [
+        {
+          "title": "Show HN: InstinctFlash – High-Performance Serving Runtime for Robotics Models",
+          "url": "https://github.com/General-Instinct/InstinctFlash",
+          "source_type": "hackernews",
+          "source_name": "github.com",
+          "engagement": {
+            "points": 24,
+            "comments": 3
+          },
+          "published_at": "2026-09-22T15:20:06+00:00"
+        },
+        {
+          "title": "Intrinsic Core Open-Sources a Local ROS 2 Runtime for Industrial Robotics | AiCybr Blog",
+          "url": "https://aicybr.com/blog/intrinsic-core-open-source-industrial-robotics",
+          "source_type": "brave",
+          "source_name": "aicybr.com",
+          "engagement": null,
+          "published_at": "2026-09-22T16:49:28.653298+00:00"
+        }
+      ],
+      "importance_score": 0.86,
+      "published_at": "2026-09-22T16:49:28.653298+00:00",
+      "cluster_title": "InstinctFlash high‑performance serving runtime for robotics models",
+      "single_source": false
+    },
+    {
+      "headline": "Aurora targets deployment of over 30,000 driverless trucks by 2030",
+      "blurb": "Aurora announced plans to scale its autonomous‑truck fleet to more than 30,000 units by 2030, after nearly doubling its customer base in 2026 and operating 200 driverless trucks today. The company cites cost‑reducing hardware and SaaS‑style margins as key enablers.",
+      "why_it_matters": "Reaching this scale could transform freight logistics, reducing shipping costs and emissions while reshaping the trucking industry.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 4,
+      "sources": [
+        {
+          "title": "Aurora targets 30,000+ driverless trucks by 2030 | AUR Stock News",
+          "url": "https://stocktitan.net/news/AUR/aurora-outlines-2030-vision-to-scale-to-30-000-driverless-trucks-at-48tzpijbafq8.html",
+          "source_type": "brave",
+          "source_name": "stocktitan.net",
+          "engagement": null,
+          "published_at": "2026-09-23T12:49:18.744865+00:00"
+        },
+        {
+          "title": "Aurora Outlines 2030 Vision to Scale to 30,000 Driverless Trucks at Analyst and Investor Day | FinancialContent",
+          "url": "https://financialcontent.com/article/bizwire-2026-9-23-aurora-outlines-2030-vision-to-scale-to-30000-driverless-trucks-at-analyst-and-investor-day",
+          "source_type": "brave",
+          "source_name": "financialcontent.com",
+          "engagement": null,
+          "published_at": "2026-09-23T12:49:30.382472+00:00"
+        },
+        {
+          "title": "AUR: Aims for 30,000+ driverless trucks and multi-billion revenue by 2030, with strong 2026 momentum — TradingView News",
+          "url": "https://www.tradingview.com/news/urn:summary_document_report:quartr.com:4117214:0-aur-aims-for-30-000-driverless-trucks-and-multi-billion-revenue-by-2030-with-strong-2026-momentum/",
+          "source_type": "brave",
+          "source_name": "tradingview.com",
+          "engagement": null,
+          "published_at": "2026-09-23T12:49:30.382556+00:00"
+        }
+      ],
+      "importance_score": 0.85,
+      "published_at": "2026-09-23T12:49:30.382556+00:00",
+      "cluster_title": "Aurora aims for 30,000+ driverless trucks by 2030",
+      "single_source": false
+    },
+    {
+      "headline": "Teardown of DJI drones shows high‑margin hardware as FCC prepares to block DJI chips in US‑built drones",
+      "blurb": "A detailed teardown of two popular DJI drones revealed the components and design choices that give the Chinese maker its unusually high profit margins. Meanwhile, the U.S. Federal Communications Commission announced a rule that will take effect on October 13, preventing any radio device that uses DJI‑sourced chips from receiving equipment authorization for new drones built in the United States.",
+      "why_it_matters": "Understanding DJI’s hardware economics helps explain why regulators are targeting its components, and the FCC rule could reshape the domestic drone supply chain by forcing manufacturers to source non‑DJI chips.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 5,
+      "sources": [
+        {
+          "title": "Can the US Build a DJI? A Teardown of Two DJI Drones",
+          "url": "https://www.arenaphysica.com/publications/dji-teardown",
+          "source_type": "hackernews",
+          "source_name": "arenaphysica.com",
+          "engagement": {
+            "points": 16,
+            "comments": 12
+          },
+          "published_at": "2026-09-23T00:32:20+00:00"
+        },
+        {
+          "title": "FCC Bars DJI Chips From New US-Built Drones on October 13",
+          "url": "https://dronexl.co/2026/09/21/fcc-logic-bearing-components-drones-october-13/",
+          "source_type": "brave",
+          "source_name": "dronexl.co",
+          "engagement": null,
+          "published_at": "2026-09-21T16:49:32.136504+00:00"
+        }
+      ],
+      "importance_score": 0.82,
+      "published_at": "2026-09-23T00:32:20+00:00",
+      "cluster_title": "Teardown of two DJI drones reveals hardware design",
+      "single_source": false
+    },
+    {
+      "headline": "Robot.com and Grubhub launch autonomous delivery on ten additional college campuses",
+      "blurb": "Robot.com, the maker of delivery robots, announced a partnership with Grubhub to roll out its autonomous units across ten new university sites. The expansion follows a market outlook that projects the autonomous delivery robot sector to grow at a 35.8% compound annual rate through 2026.",
+      "why_it_matters": "Wider campus deployments accelerate real‑world testing and could speed up broader urban adoption of robot‑based last‑mile logistics.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 6,
+      "sources": [
+        {
+          "title": "Robot.com and Grubhub Expand Autonomous Delivery to 10 New Campuses",
+          "url": "https://prnewswire.com/news-releases/robotcom-and-grubhub-expand-autonomous-delivery-to-10-new-campuses-302886798.html",
+          "source_type": "brave",
+          "source_name": "prnewswire.com",
+          "engagement": null,
+          "published_at": "2026-09-23T16:00:18.745058+00:00"
+        },
+        {
+          "title": "Autonomous Delivery Robots Market Report 2026 Market Outlook Supported By A Forecast 35.8% CAGR",
+          "url": "https://openpr.com/news/4639682/autonomous-delivery-robots-market-report-2026-market-outlook",
+          "source_type": "brave",
+          "source_name": "openpr.com",
+          "engagement": null,
+          "published_at": "2026-09-22T16:49:33.875219+00:00"
+        }
+      ],
+      "importance_score": 0.8099999999999999,
+      "published_at": "2026-09-23T16:00:18.745058+00:00",
+      "cluster_title": "Robot.com and Grubhub expand autonomous delivery to 10 campuses",
+      "single_source": false
+    },
+    {
+      "headline": "Robotaxi debate heats up in Washington, while Tesla’s fleet reaches 67 vehicles",
+      "blurb": "A rally organized by the D.C. Council highlighted growing opposition to Waymo’s robotaxi service. In the same week, Texas DMV filings showed Tesla added nine Cybercab units, bringing its robotaxi fleet to a total of 67 vehicles.",
+      "why_it_matters": "Regulatory scrutiny and fleet expansion signal that autonomous ride‑hailing is moving from pilot projects toward mainstream transportation, but faces political pushback.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 7,
+      "sources": [
+        {
+          "title": "Waymo robotaxi opposition grows with DC rally - Axios Washington D.C.",
+          "url": "https://www.axios.com/local/washington-dc/2026/09/23/waymo-robotaxi-dc-bill-opposition-rally",
+          "source_type": "brave",
+          "source_name": "axios.com",
+          "engagement": null,
+          "published_at": "2026-09-23T10:49:18.744629+00:00"
+        },
+        {
+          "title": "Tesla Robotaxi Fleet Grows to 67 | AI News Detail | Blockchain.News",
+          "url": "https://blockchain.news/ainews/tesla-robotaxi-fleet-grows-to-67",
+          "source_type": "brave",
+          "source_name": "blockchain.news",
+          "engagement": null,
+          "published_at": "2026-09-21T16:49:38.906400+00:00"
+        }
+      ],
+      "importance_score": 0.76,
+      "published_at": "2026-09-23T10:49:18.744629+00:00",
+      "cluster_title": "Waymo robotaxi opposition grows with DC rally",
+      "single_source": false
+    },
+    {
+      "headline": "Uber bets on human drivers to make its $10 B autonomous vehicle push profitable",
+      "blurb": "Uber is investing $10 billion in autonomous vehicle development, but its strategy emphasizes a large network of human drivers to keep robotaxi economics viable. Analysts note that this human‑driver edge could differentiate Uber from rivals like Waymo and Tesla.",
+      "why_it_matters": "Combining human drivers with autonomous tech may allow Uber to scale faster while the industry works out the cost model for fully driverless fleets.",
+      "category": "autonomous_vehicles",
+      "is_research_paper": false,
+      "order": 8,
+      "sources": [
+        {
+          "title": "Uber's robotaxi edge: human drivers",
+          "url": "https://www.axios.com/2026/09/23/uber-robotaxi-human-drivers",
+          "source_type": "brave",
+          "source_name": "axios.com",
+          "engagement": null,
+          "published_at": "2026-09-23T09:49:18.744586+00:00"
+        },
+        {
+          "title": "Robotaxi competition revs up as Uber makes $10B investment in autonomous vehicles | Smart Cities Dive",
+          "url": "https://www.smartcitiesdive.com/news/robotaxi-wars-uber-waymo-zoox-tesla/830930/",
+          "source_type": "brave",
+          "source_name": "smartcitiesdive.com",
+          "engagement": null,
+          "published_at": "2026-09-22T16:49:40.533996+00:00"
+        },
+        {
+          "title": "Robotaxi competition revs up, weighing on Uber and Lyft stocks",
+          "url": "https://finance.yahoo.com/video/robotaxi-competition-revs-weighing-uber-141500621.html",
+          "source_type": "brave",
+          "source_name": "finance.yahoo.com",
+          "engagement": null,
+          "published_at": "2026-09-22T16:49:40.534125+00:00"
+        }
+      ],
+      "importance_score": 0.74,
+      "published_at": "2026-09-23T09:49:18.744586+00:00",
+      "cluster_title": "Uber’s robotaxi edge: human drivers",
+      "single_source": false
+    }
+  ],
+  "errors": []
+}

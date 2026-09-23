@@ -29,6 +29,11 @@ from .quotas import (
 )
 from . import funnel as funnel_mod
 from .corroborate import corroborate_clusters
+from .quality import (
+    MAX_SOURCES_PER_CARD,
+    polish_cards_for_publish,
+    split_mixed_clusters,
+)
 from .sources import (
     independent_outlet_count,
     is_corroborated,
@@ -73,8 +78,8 @@ _run_stats: dict[str, Any] = {
     "t0": None,
 }
 
-_CLUSTER_CATEGORIES = frozenset(ALL_CATEGORY_SLUGS)
-_CARD_CATEGORIES = _CLUSTER_CATEGORIES
+_CLUSTER_CATEGORIES = frozenset(ALL_CATEGORY_SLUGS) | frozenset({"not_tech_news"})
+_CARD_CATEGORIES = frozenset(ALL_CATEGORY_SLUGS)
 
 
 def create_client() -> Groq:
@@ -875,6 +880,10 @@ def _validate_cluster(
     if cat not in _CLUSTER_CATEGORIES:
         logger.warning("Invalid primary_category %r — dropping cluster %r", cat, title)
         return None
+    # Cap cluster size so mixed mega-clusters cannot ship 7+ unrelated sources.
+    indices = list(dict.fromkeys(indices))[:MAX_SOURCES_PER_CARD]
+    if not indices:
+        return None
     score = c.get("importance_score", 0.5)
     try:
         score_f = float(score)
@@ -896,10 +905,18 @@ def _validate_card(c: dict[str, Any]) -> dict[str, Any] | None:
     category = c.get("category")
     if not headline or not blurb or not why:
         return None
+    if category == "not_tech_news":
+        logger.info("Dropping not_tech_news card: %s", headline[:60])
+        return None
     # Drop retired / unknown categories (e.g. legacy ``dev_tools``) instead of
     # parking them in general.
     if category not in _CARD_CATEGORIES:
         logger.warning("Dropping card with invalid category %r: %s", category, headline[:60])
+        return None
+    from .quality import has_meta_language
+
+    if has_meta_language(f"{headline} {blurb} {why}"):
+        logger.info("Dropping card with meta language: %s", headline[:60])
         return None
     out: dict[str, Any] = {
         "headline": headline,
@@ -1203,10 +1220,29 @@ async def cluster_articles(
         if remaining > 0:
             await asyncio.sleep(2.0)
 
+    # Drop off-topic clusters and split mixed same-event failures (no extra LLM).
+    cleaned: list[dict[str, Any]] = []
+    for c in all_clusters:
+        if c.get("primary_category") == "not_tech_news":
+            logger.info(
+                "Dropping not_tech_news cluster: %s",
+                (c.get("cluster_title") or "")[:60],
+            )
+            continue
+        cleaned.append(c)
+    before = len(cleaned)
+    cleaned = split_mixed_clusters(cleaned, working)
+    if len(cleaned) != before:
+        logger.info(
+            "Split mixed clusters: %s → %s after same-event check",
+            before,
+            len(cleaned),
+        )
+
     _log_run_stats("clustering")
-    if not all_clusters:
+    if not cleaned:
         logger.warning("No valid clusters after per-category clustering")
-    return all_clusters, working
+    return cleaned, working
 
 
 def _build_minimal_card_payload(
@@ -1383,18 +1419,20 @@ def _attach_sources_and_meta(
                         }
                     )
                     break
-    card["sources"] = sources
-    multi = is_corroborated(sources) or bool(cluster.get("corroborated"))
+    card["sources"] = sources[:MAX_SOURCES_PER_CARD]
+    multi = is_corroborated(card["sources"]) or bool(cluster.get("corroborated"))
     is_paper = bool(card.get("is_research_paper")) or bool(
         cluster.get("research_primary")
-    ) or any(s.get("source_type") == "arxiv" for s in sources)
+    ) or any(s.get("source_type") == "arxiv" for s in card["sources"])
     if is_paper:
         card["is_research_paper"] = True
     # single_source: news cards with <2 outlets (research-only arXiv is allowed).
-    if is_paper and independent_outlet_count(sources) <= 1:
+    if is_paper and independent_outlet_count(card["sources"]) <= 1:
         card["single_source"] = False
     else:
-        card["single_source"] = not multi and independent_outlet_count(sources) < 2
+        card["single_source"] = (
+            not multi and independent_outlet_count(card["sources"]) < 2
+        )
     if latest_pub is not None:
         card["published_at"] = latest_pub.isoformat()
     try:
@@ -1854,6 +1892,15 @@ async def generate_cards(
         all_cards.extend(cards)
 
     all_cards = _dedupe_cards(all_cards)
+    by_url = {(a.url or "").strip(): a for a in articles if (a.url or "").strip()}
+    before_n = len(all_cards)
+    all_cards = polish_cards_for_publish(all_cards, articles_by_url=by_url)
+    if len(all_cards) != before_n:
+        logger.info(
+            "Quality polish dropped/moved cards: %s → %s",
+            before_n,
+            len(all_cards),
+        )
     counts: dict[str, int] = {}
     for c in all_cards:
         cat = c.get("category") or GENERAL_SLUG

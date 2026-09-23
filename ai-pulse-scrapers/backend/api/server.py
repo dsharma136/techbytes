@@ -372,10 +372,32 @@ async def _run_pipeline_and_persist(
 
 
 def _parse_categories_arg(raw: str | None) -> list[str] | None:
+    """Parse CLI category labels; accepts short aliases like ``av``."""
     if not raw or not str(raw).strip():
         return None
+    aliases = {
+        "av": "autonomous vehicles",
+        "avs": "autonomous vehicles",
+        "autonomous": "autonomous vehicles",
+        "ai": "AI/ML",
+        "aiml": "AI/ML",
+        "ml": "AI/ML",
+        "chips": "chips & hardware",
+        "hardware": "chips & hardware",
+        "network": "networking & cloud",
+        "networking": "networking & cloud",
+        "cloud": "networking & cloud",
+        "cyber": "cybersecurity",
+        "security": "cybersecurity",
+    }
     parts = [p.strip() for p in str(raw).split(",")]
-    return [p for p in parts if p]
+    out: list[str] = []
+    for p in parts:
+        if not p:
+            continue
+        key = p.lower().replace("_", " ").strip()
+        out.append(aliases.get(key, p))
+    return out or None
 
 
 def _category_counts(cards: list[FeedCard]) -> list[CategoryCount]:

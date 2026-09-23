@@ -179,6 +179,11 @@ CATEGORY_QUERIES: dict[str, list[str]] = {
         "lidar perception",
         "motion planning",
         "robotaxi autonomous vehicle",
+        "self-driving car",
+        "autonomous truck",
+        "delivery robot",
+        "UAV drone regulation",
+        "vehicle cybersecurity",
     ],
 }
 

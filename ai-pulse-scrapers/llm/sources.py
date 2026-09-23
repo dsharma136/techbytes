@@ -109,31 +109,45 @@ def same_story_match(
     seed_dates: list[str | None],
     candidate_published_at: str | None,
     max_day_gap: float = 3.0,
+    candidate_url: str | None = None,
 ) -> bool:
     """
-    True when the candidate looks like coverage of the same story.
+    True when the candidate looks like coverage of the same specific event.
 
-    Requires overlapping significant tokens (company/product/event cues) and a
-    publish date within ``max_day_gap`` days when both sides have dates.
+    Requires strong overlapping company/product/incident cues. Rejects listicles,
+    roundups, and bare index/section pages.
     """
+    # Local import avoids a cycle (quality imports significant_tokens from here).
+    try:
+        from .quality import looks_like_listicle_or_index
+    except Exception:  # pragma: no cover
+        looks_like_listicle_or_index = lambda *_a, **_k: False  # type: ignore
+
+    if looks_like_listicle_or_index(candidate_title or "", candidate_url or ""):
+        return False
+
     seed = significant_tokens(
         " ".join([cluster_title or "", *seed_titles]),
-        limit=20,
+        limit=24,
     )
-    cand = significant_tokens(candidate_title or "", limit=16)
+    cand = significant_tokens(candidate_title or "", limit=18)
     if not seed or not cand:
         return False
     overlap = seed & cand
-    # Need at least two shared cues, or one strong multi-char proper-ish token
-    # plus another token when titles are short.
-    if len(overlap) < 2:
-        strong = {t for t in overlap if len(t) >= 5 or any(ch.isdigit() for ch in t)}
-        if len(strong) < 1 or len(overlap) < 1:
-            return False
-        if len(overlap) < 2 and len(strong) < 1:
-            return False
-        if len(overlap) == 1 and len(strong) == 1 and len(next(iter(strong))) < 6:
-            return False
+    # Require at least two shared cues, including one "strong" entity-like token.
+    strong = {
+        t
+        for t in overlap
+        if len(t) >= 5 or any(ch.isdigit() for ch in t) or t.isupper()
+    }
+    # significant_tokens lowercases, so isupper won't fire — use length/digit.
+    strong = {t for t in overlap if len(t) >= 5 or any(ch.isdigit() for ch in t)}
+    if len(overlap) < 2 or len(strong) < 1:
+        return False
+    # Avoid weak matches like only "china" + "news".
+    weak_only = {"china", "news", "update", "report", "says", "after", "into"}
+    if overlap <= weak_only:
+        return False
 
     from datetime import datetime, timezone
 
@@ -157,6 +171,4 @@ def same_story_match(
         nearest = min(abs((cand_dt - d).total_seconds()) for d in seed_dts)
         if nearest > max_day_gap * 86400:
             return False
-    return len(overlap) >= 2 or (
-        len(overlap) >= 1 and any(len(t) >= 6 for t in overlap)
-    )
+    return True
