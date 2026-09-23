@@ -94,8 +94,20 @@ async def scrape_page(url: str, timeout: float = 10.0) -> dict[str, Any]:
             "og_image": og_image,
             "error": None,
         }
+    except httpx.HTTPStatusError as e:
+        code = e.response.status_code if e.response is not None else None
+        if code in (403, 404):
+            # Many publishers block bots; expected noise, keep logs short.
+            logger.info("scrape_page %s for %s (blocked or missing)", code, url)
+        else:
+            logger.warning("scrape_page HTTP %s for %s", code, url)
+        return _error_result(url, e)
     except Exception as e:
-        logger.warning("scrape_page failed for %s: %s", url, e)
+        msg = str(e)
+        if "403" in msg or "404" in msg:
+            logger.info("scrape_page blocked/missing for %s", url)
+        else:
+            logger.warning("scrape_page failed for %s: %s", url, e)
         return _error_result(url, e)
 
 

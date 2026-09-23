@@ -13,15 +13,18 @@ import asyncio
 import json
 import logging
 import os
+import re
 import secrets
 import time
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from backend.graph import generate_daily_feed
 from backend.models.schemas import CategoryCount, DailyFeedResponse, FeedCard
@@ -57,6 +60,107 @@ class EmptyFeedError(RuntimeError):
         self.errors = list(errors or [])
         msg = "; ".join(self.errors) if self.errors else "Pipeline produced no cards"
         super().__init__(msg)
+
+
+# Redact secrets if an exception message ever echoes env values.
+_SECRET_PATTERNS = (
+    re.compile(r"(?i)(api[_-]?key|secret|token|password|authorization)\s*[:=]\s*\S+"),
+    re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._\-]+"),
+    re.compile(r"\bgsk_[A-Za-z0-9]+"),
+    re.compile(r"\bBSA[A-Za-z0-9_\-]+"),
+)
+
+
+def _sanitize_public_error(text: str, *, limit: int = 800) -> str:
+    out = str(text or "")
+    for pat in _SECRET_PATTERNS:
+        out = pat.sub("[redacted]", out)
+    return out[:limit]
+
+
+def _parse_groq_tpd_fields(message: str) -> dict[str, Any]:
+    """Extract Limit / Used / reset hint from a GroqDailyLimitError message."""
+    limit = used = reset = None
+    m = re.search(r"Limit\s+(\d+)\s*,\s*Used\s+(\d+)", message, flags=re.IGNORECASE)
+    if m:
+        limit = int(m.group(1))
+        used = int(m.group(2))
+    m2 = re.search(
+        r"try again in\s+([0-9]+m[0-9.]*s|[0-9.]+s|[0-9]+h[0-9m.]*s?)",
+        message,
+        flags=re.IGNORECASE,
+    )
+    if m2:
+        reset = m2.group(1)
+    else:
+        m3 = re.search(
+            r"Resets in about\s+([0-9]+m[0-9.]*s|[0-9.]+s)",
+            message,
+            flags=re.IGNORECASE,
+        )
+        if m3:
+            reset = m3.group(1)
+    return {"limit": limit, "used": used, "resets_in": reset}
+
+
+async def _generate_http_result() -> DailyFeedResponse | JSONResponse:
+    """
+    Run the pipeline for cron/refresh endpoints.
+
+    On failure the stored feed is left untouched and a JSON error body is returned
+    (never a bare 500 with no detail).
+    """
+    from llm.processor import GroqDailyLimitError
+
+    try:
+        return await _run_pipeline_and_persist()
+    except GroqDailyLimitError as e:
+        msg = _sanitize_public_error(str(e), limit=1200)
+        fields = _parse_groq_tpd_fields(msg)
+        logger.error(
+            "GENERATE FAILED (Groq daily limit): limit=%s used=%s resets_in=%s",
+            fields.get("limit"),
+            fields.get("used"),
+            fields.get("resets_in"),
+        )
+        return JSONResponse(
+            status_code=429,
+            content={
+                "error": "groq_daily_limit",
+                "message": "Groq daily token limit reached; previous feed retained",
+                "limit": fields.get("limit"),
+                "used": fields.get("used"),
+                "resets_in": fields.get("resets_in"),
+                "detail": msg,
+                "previous_feed_retained": True,
+            },
+        )
+    except EmptyFeedError as e:
+        logger.error(
+            "GENERATE FAILED (empty feed): reasons=%s — previous feed retained",
+            e.errors,
+        )
+        return JSONResponse(
+            status_code=502,
+            content={
+                "error": "empty_feed",
+                "message": "Generation produced no cards; previous feed retained",
+                "errors": [_sanitize_public_error(x, limit=400) for x in e.errors],
+                "previous_feed_retained": True,
+            },
+        )
+    except Exception as e:
+        logger.exception("GENERATE FAILED: %s: %s", type(e).__name__, e)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "generate_failed",
+                "exception_type": type(e).__name__,
+                "message": _sanitize_public_error(str(e)),
+                "previous_feed_retained": True,
+            },
+        )
+
 
 CORS_ORIGINS = [
     "http://localhost:5173",
@@ -331,48 +435,30 @@ async def cards_today_cached() -> DailyFeedResponse:
     return _response_from_store(data, cached=True)
 
 
-@api_router.post("/cards/refresh", response_model=DailyFeedResponse)
+@api_router.post("/cards/refresh", response_model=None)
 async def cards_refresh(
     authorization: str | None = Header(default=None),
-) -> DailyFeedResponse:
+) -> DailyFeedResponse | JSONResponse:
     """Force full pipeline run (requires ``Authorization: Bearer <CRON_SECRET>``)."""
     _check_cron_secret(authorization)
     async with _pipeline_lock:
-        try:
-            return await _run_pipeline_and_persist()
-        except EmptyFeedError as e:
-            raise HTTPException(
-                status_code=502,
-                detail={
-                    "message": "Generation produced no cards; previous feed retained",
-                    "errors": e.errors,
-                },
-            ) from e
+        return await _generate_http_result()
 
 
-@api_router.get("/cron/generate", response_model=DailyFeedResponse)
+@api_router.get("/cron/generate", response_model=None)
 async def cron_generate(
     authorization: str | None = Header(default=None),
-) -> DailyFeedResponse:
+) -> DailyFeedResponse | JSONResponse:
     """
     Daily cron entrypoint: run pipeline and persist to Redis/disk.
 
     Requires ``Authorization: Bearer <CRON_SECRET>`` (Vercel Cron sends this when
-    ``CRON_SECRET`` is set in the project env). Failed/empty runs do not overwrite
-    the previous feed and return HTTP 502.
+    ``CRON_SECRET`` is set in the project env). Failed/empty/Groq-limit runs do
+    not overwrite the previous feed; errors return JSON (429 / 502 / 500).
     """
     _check_cron_secret(authorization)
     async with _pipeline_lock:
-        try:
-            return await _run_pipeline_and_persist()
-        except EmptyFeedError as e:
-            raise HTTPException(
-                status_code=502,
-                detail={
-                    "message": "Generation produced no cards; previous feed retained",
-                    "errors": e.errors,
-                },
-            ) from e
+        return await _generate_http_result()
 
 
 @api_router.get("/categories", response_model=list[CategoryCount])
