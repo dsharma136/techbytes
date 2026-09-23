@@ -46,9 +46,13 @@ GROQ_MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
 # Free-tier TPM for gpt-oss-120b is ~8K; stay under until headers teach us the real limit.
 DEFAULT_TPM_CEILING = 8_000
 TOKEN_BUDGET_CEILING = int(os.environ.get("TOKEN_BUDGET_CEILING", "7000"))
-CLUSTER_MAX_OUT = 1200
-CARDS_MAX_OUT = 1600
+# gpt-oss counts reasoning toward max_completion_tokens; leave room for reasoning + JSON.
+CLUSTER_MAX_OUT = int(os.environ.get("CLUSTER_MAX_OUT", "4000"))
+CARDS_MAX_OUT = int(os.environ.get("CARDS_MAX_OUT", "2500"))
+# Forced to ``low`` for gpt-oss in ``call_llm`` so the final answer is not starved.
 REASONING_EFFORT = os.environ.get("GROQ_REASONING_EFFORT", "low")
+# Minimum completion budget for gpt-oss clustering (reasoning + final JSON).
+GPT_OSS_MIN_COMPLETION = int(os.environ.get("GPT_OSS_MIN_COMPLETION", "2500"))
 
 # Base freshness window (days); may widen per category up to CLUSTER_MAX_AGE_CAP.
 CLUSTER_MAX_AGE_DAYS = float(os.environ.get("CLUSTER_MAX_AGE_DAYS", "3"))
@@ -643,6 +647,31 @@ def _should_halve_clustering_input(exc: BaseException) -> bool:
     return False
 
 
+def _is_empty_content_error(exc: BaseException) -> bool:
+    return "empty final content" in str(exc).lower()
+
+
+def _gpt_oss_out_budget(
+    *,
+    max_tokens: int,
+    est_in: int,
+    ceiling: int,
+    prefer_large: bool = False,
+) -> int:
+    """
+    Completion budget for gpt-oss: leave room for reasoning + final JSON under TPM.
+
+    ``prefer_large`` is used on empty-content retries — spend as much of the
+    ceiling as possible on output after the (smaller) prompt.
+    """
+    room = max(256, ceiling - est_in)
+    if prefer_large:
+        desired = max(max_tokens, GPT_OSS_MIN_COMPLETION, min(4500, room))
+    else:
+        desired = max(max_tokens, GPT_OSS_MIN_COMPLETION)
+    return max(256, min(desired, room))
+
+
 async def call_llm(
     prompt: str,
     max_tokens: int = 2000,
@@ -653,15 +682,23 @@ async def call_llm(
     """
     Call Groq chat completions.
 
-    For ``openai/gpt-oss-*`` reasoning models: low reasoning effort, final answer
+    For ``openai/gpt-oss-*`` reasoning models: ``reasoning_effort=low``, final answer
     only in ``message.content`` (never reasoning text). Respects TPM via headers
-    and waits on HTTP 429 ``retry-after``.
+    and waits on HTTP 429 ``retry-after``. Empty content retries once with a
+    smaller prompt and a larger completion budget.
     """
     client = create_client()
     ceiling = _budget_ceiling()
     est_in = _estimate_input_tokens(prompt)
-    # Keep prompt + completion (incl. reasoning tokens billed in completion) under TPM.
-    allowed_out = max(256, min(max_tokens, ceiling - est_in))
+    is_gpt_oss = "gpt-oss" in model
+
+    if is_gpt_oss:
+        allowed_out = _gpt_oss_out_budget(
+            max_tokens=max_tokens, est_in=est_in, ceiling=ceiling
+        )
+    else:
+        allowed_out = max(256, min(max_tokens, ceiling - est_in))
+
     if allowed_out < max_tokens:
         logger.warning(
             "Capping max_completion_tokens from %s to %s for TPM budget (est_in=%s ceiling=%s)",
@@ -670,11 +707,15 @@ async def call_llm(
             est_in,
             ceiling,
         )
+    elif is_gpt_oss and allowed_out > max_tokens:
+        logger.info(
+            "Raising max_completion_tokens %s → %s for gpt-oss reasoning+JSON headroom",
+            max_tokens,
+            allowed_out,
+        )
 
     # Wait so we are not starting a call with almost-empty remaining TPM.
     await _ensure_tpm_headroom(est_in + allowed_out)
-
-    is_gpt_oss = "gpt-oss" in model
 
     def _sync_call(p: str, out_tokens: int) -> str:
         kwargs: dict[str, Any] = {
@@ -684,7 +725,8 @@ async def call_llm(
             "max_completion_tokens": out_tokens,
         }
         if is_gpt_oss:
-            kwargs["reasoning_effort"] = REASONING_EFFORT
+            # Always low: medium/high often exhaust completion budget before JSON.
+            kwargs["reasoning_effort"] = "low"
             kwargs["include_reasoning"] = False
 
         # Prefer raw response so we can read rate-limit headers.
@@ -731,9 +773,47 @@ async def call_llm(
                     continue
                 raise
 
+    async def _retry_empty_content(first_prompt: str, first_out: int) -> str:
+        """Smaller input + larger completion budget after a reasoning-only blank."""
+        if retry_with_half_prompt is not None:
+            prompt2 = retry_with_half_prompt()
+        else:
+            # No halver: keep prompt, only enlarge output if the ceiling allows.
+            prompt2 = first_prompt
+        est2 = _estimate_input_tokens(prompt2)
+        ceil2 = _budget_ceiling()
+        out2 = _gpt_oss_out_budget(
+            max_tokens=max(max_tokens, first_out),
+            est_in=est2,
+            ceiling=ceil2,
+            prefer_large=True,
+        )
+        logger.warning(
+            "Empty final content; retrying once with smaller input "
+            "(est_in %s→%s) and larger output (%s→%s)",
+            _estimate_input_tokens(first_prompt),
+            est2,
+            first_out,
+            out2,
+        )
+        await _ensure_tpm_headroom(est2 + out2)
+        return await asyncio.to_thread(_call_with_429_retry, prompt2, out2)
+
     try:
         return await asyncio.to_thread(_call_with_429_retry, prompt, allowed_out)
     except GroqDailyLimitError:
+        raise
+    except ValueError as e:
+        if _is_empty_content_error(e):
+            try:
+                return await _retry_empty_content(prompt, allowed_out)
+            except GroqDailyLimitError:
+                raise
+            except ValueError as e2:
+                if _is_empty_content_error(e2):
+                    logger.error("Empty final content again after retry")
+                raise
+        logger.exception("Groq API call failed: %s", e)
         raise
     except APIStatusError as e:
         if (
@@ -752,7 +832,12 @@ async def call_llm(
             )
             prompt2 = retry_with_half_prompt()
             est2 = _estimate_input_tokens(prompt2)
-            out2 = max(256, min(allowed_out, _budget_ceiling() - est2))
+            out2 = _gpt_oss_out_budget(
+                max_tokens=max_tokens,
+                est_in=est2,
+                ceiling=_budget_ceiling(),
+                prefer_large=True,
+            )
             try:
                 return await asyncio.to_thread(_call_with_429_retry, prompt2, out2)
             except GroqDailyLimitError:
@@ -876,12 +961,20 @@ async def _cluster_one_batch(
         )
 
     _log_token_estimate(phase, prompt, CLUSTER_MAX_OUT)
-    raw = await call_llm(
-        prompt,
-        max_tokens=CLUSTER_MAX_OUT,
-        model=GROQ_MODEL,
-        retry_with_half_prompt=_halve_and_rebuild_prompt,
-    )
+    try:
+        raw = await call_llm(
+            prompt,
+            max_tokens=CLUSTER_MAX_OUT,
+            model=GROQ_MODEL,
+            retry_with_half_prompt=_halve_and_rebuild_prompt,
+        )
+    except GroqDailyLimitError:
+        raise
+    except Exception as e:
+        # One category failing must not abort the whole feed.
+        logger.error("%s: clustering call failed: %s", phase, e)
+        return []
+
     parsed = _parse_json_llm(raw)
     if parsed is None or not isinstance(parsed, list):
         logger.warning(
@@ -891,11 +984,17 @@ async def _cluster_one_batch(
         await asyncio.sleep(2.0)
         prompt2 = _halve_and_rebuild_prompt()
         _log_token_estimate(f"{phase}:retry", prompt2, CLUSTER_MAX_OUT)
-        raw2 = await call_llm(
-            prompt2,
-            max_tokens=CLUSTER_MAX_OUT,
-            model=GROQ_MODEL,
-        )
+        try:
+            raw2 = await call_llm(
+                prompt2,
+                max_tokens=CLUSTER_MAX_OUT,
+                model=GROQ_MODEL,
+            )
+        except GroqDailyLimitError:
+            raise
+        except Exception as e:
+            logger.error("%s: clustering retry failed: %s", phase, e)
+            return []
         parsed = _parse_json_llm(raw2)
     if parsed is None or not isinstance(parsed, list):
         logger.error("%s: could not parse clustering JSON after retry", phase)
@@ -925,11 +1024,17 @@ async def _cluster_one_batch(
         await asyncio.sleep(2.0)
         prompt2 = _halve_and_rebuild_prompt()
         _log_token_estimate(f"{phase}:thin-retry", prompt2, CLUSTER_MAX_OUT)
-        raw2 = await call_llm(
-            prompt2,
-            max_tokens=CLUSTER_MAX_OUT,
-            model=GROQ_MODEL,
-        )
+        try:
+            raw2 = await call_llm(
+                prompt2,
+                max_tokens=CLUSTER_MAX_OUT,
+                model=GROQ_MODEL,
+            )
+        except GroqDailyLimitError:
+            raise
+        except Exception as e:
+            logger.error("%s: thin-retry failed: %s", phase, e)
+            return out
         parsed2 = _parse_json_llm(raw2)
         if isinstance(parsed2, list):
             retry_out: list[dict[str, Any]] = []
@@ -1022,11 +1127,23 @@ async def cluster_articles(
         per_cat[GENERAL_SLUG] = residual
 
     # Build global working list and remapped clusters.
+    # Honor ``target_clusters`` (from ``--max-cards``) so small test runs do not
+    # burn a Groq call for every topic category.
     working: list[Article] = []
     url_to_global: dict[str, int] = {}
     all_clusters: list[dict[str, Any]] = []
+    remaining = max(1, int(target_clusters))
 
     for slug, pool in per_cat.items():
+        if remaining <= 0:
+            logger.info(
+                "Stopping per-category clustering early: already have %s clusters "
+                "(target_clusters=%s)",
+                len(all_clusters),
+                target_clusters,
+            )
+            break
+
         # Append unseen articles to working.
         local_articles: list[Article] = []
         for a in pool:
@@ -1039,7 +1156,11 @@ async def cluster_articles(
             local_articles.append(a)
 
         quota = CATEGORY_QUOTA
-        target = min(quota + 2, max(MIN_CATEGORY_CARDS, len(local_articles)))
+        target = min(
+            quota + 2,
+            max(MIN_CATEGORY_CARDS, len(local_articles)),
+            remaining + 2,
+        )
         phase = f"clustering[{slug}]"
         raw_clusters = await _cluster_one_batch(
             local_articles,
@@ -1047,6 +1168,7 @@ async def cluster_articles(
             forced_category=slug if slug != GENERAL_SLUG else None,
             phase=phase,
         )
+        added = 0
         for c in raw_clusters:
             # Map from local trimmed indices → local_articles → global.
             local_arts: list[Article] = c.pop("_local_articles", local_articles)
@@ -1066,8 +1188,20 @@ async def cluster_articles(
             elif c.get("primary_category") not in _CLUSTER_CATEGORIES:
                 c["primary_category"] = GENERAL_SLUG
             all_clusters.append(c)
+            added += 1
+            remaining -= 1
+            if remaining <= 0:
+                break
+        logger.info(
+            "%s: kept %s clusters (run total=%s, remaining_budget=%s)",
+            phase,
+            added,
+            len(all_clusters),
+            remaining,
+        )
         # Pause between category calls so free-tier TPM can recover.
-        await asyncio.sleep(2.0)
+        if remaining > 0:
+            await asyncio.sleep(2.0)
 
     _log_run_stats("clustering")
     if not all_clusters:

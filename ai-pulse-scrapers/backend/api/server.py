@@ -49,6 +49,15 @@ KNOWN_CATEGORY_SLUGS = frozenset(
     }
 )
 
+
+class EmptyFeedError(RuntimeError):
+    """Pipeline finished without publishable cards; stored feed must be left alone."""
+
+    def __init__(self, errors: list[str] | None = None):
+        self.errors = list(errors or [])
+        msg = "; ".join(self.errors) if self.errors else "Pipeline produced no cards"
+        super().__init__(msg)
+
 CORS_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -247,6 +256,13 @@ async def _run_pipeline_and_persist(
     target = int(max_cards) if max_cards is not None else 60
     state = await generate_daily_feed(categories=categories, target_cards=target)
     resp = _state_to_response(state, date_str, now_iso, cached=False)
+    if not resp.cards:
+        reasons = list(resp.errors) or ["Pipeline produced no cards"]
+        logger.error(
+            "Generation produced 0 cards — keeping previous stored feed. reasons=%s",
+            reasons,
+        )
+        raise EmptyFeedError(reasons)
     await _save_feed(_store_payload(resp), date_str)
     return resp
 
@@ -322,7 +338,16 @@ async def cards_refresh(
     """Force full pipeline run (requires ``Authorization: Bearer <CRON_SECRET>``)."""
     _check_cron_secret(authorization)
     async with _pipeline_lock:
-        return await _run_pipeline_and_persist()
+        try:
+            return await _run_pipeline_and_persist()
+        except EmptyFeedError as e:
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "message": "Generation produced no cards; previous feed retained",
+                    "errors": e.errors,
+                },
+            ) from e
 
 
 @api_router.get("/cron/generate", response_model=DailyFeedResponse)
@@ -333,11 +358,21 @@ async def cron_generate(
     Daily cron entrypoint: run pipeline and persist to Redis/disk.
 
     Requires ``Authorization: Bearer <CRON_SECRET>`` (Vercel Cron sends this when
-    ``CRON_SECRET`` is set in the project env).
+    ``CRON_SECRET`` is set in the project env). Failed/empty runs do not overwrite
+    the previous feed and return HTTP 502.
     """
     _check_cron_secret(authorization)
     async with _pipeline_lock:
-        return await _run_pipeline_and_persist()
+        try:
+            return await _run_pipeline_and_persist()
+        except EmptyFeedError as e:
+            raise HTTPException(
+                status_code=502,
+                detail={
+                    "message": "Generation produced no cards; previous feed retained",
+                    "errors": e.errors,
+                },
+            ) from e
 
 
 @api_router.get("/categories", response_model=list[CategoryCount])
@@ -390,6 +425,17 @@ async def _cli_generate(
             totals.get("calls"),
         )
         raise SystemExit(2) from e
+    except EmptyFeedError as e:
+        totals = get_run_token_totals()
+        logger.error("Generate produced no cards; previous feed kept. %s", e)
+        logger.info(
+            "Tokens used: total=%s (in=%s out=%s) calls=%s",
+            totals.get("total_tokens"),
+            totals.get("prompt_tokens"),
+            totals.get("completion_tokens"),
+            totals.get("calls"),
+        )
+        raise SystemExit(1) from e
     elapsed = time.perf_counter() - t0
     store = "redis" if _redis_enabled() else str(_feed_path(date_str))
     totals = get_run_token_totals()

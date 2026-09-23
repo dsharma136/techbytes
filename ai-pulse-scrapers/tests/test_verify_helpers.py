@@ -137,3 +137,22 @@ def test_groq_daily_limit_detection():
     assert _parse_reset_hint(e) == "9m35.424s"
     assert _is_daily_token_limit(FakeExc("Rate limit: tokens per minute (TPM)")) is False
 
+
+def test_gpt_oss_out_budget_leaves_reasoning_room():
+    from llm.processor import GPT_OSS_MIN_COMPLETION, _gpt_oss_out_budget
+
+    out = _gpt_oss_out_budget(max_tokens=1200, est_in=1500, ceiling=7000)
+    assert out >= GPT_OSS_MIN_COMPLETION
+    retry = _gpt_oss_out_budget(
+        max_tokens=1200, est_in=800, ceiling=7000, prefer_large=True
+    )
+    assert retry >= out
+
+
+def test_empty_feed_error_keeps_reasons():
+    from backend.api.server import EmptyFeedError
+
+    err = EmptyFeedError(["Cluster: blank", "Cards: none"])
+    assert "Cluster: blank" in err.errors
+    assert "blank" in str(err)
+
